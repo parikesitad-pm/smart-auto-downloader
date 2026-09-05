@@ -1,13 +1,44 @@
 {
-  "latestVersion": "1.0.0",
-  "currentVersion": "1.0.0",
+  "latestVersion": "1.1.0",
+  "currentVersion": "1.1.0",
   "releases": [
+    {
+      "version": "v1.1.0",
+      "releaseDate": "2026-09-05",
+      "commitHash": "2d8f91c",
+      "tagline": "Build System Stabilization & Incremental Versioning Pipeline",
+      "isCurrent": true,
+      "whatsNew": [
+        "Dynamic incremental versioning policy: automatically tracks minor patches (v1.1, v1.2...) and major revisions (v2.0).",
+        "Automated Rust & Cargo toolchain diagnostic checker for smooth desktop compilation.",
+        "Synchronized Tauri v2 NPM packages and Rust crates to eliminate build warnings."
+      ],
+      "improvementsAndFixes": [
+        "Fixed TypeScript SVG symbol property typing in typography atoms.",
+        "Resolved unused variable lint warnings across Settings, HelpModal, and DownloadCard.",
+        "Added automatic Git commit hash capture fallback for initial repository states."
+      ],
+      "commitLog": [
+        {
+          "hash": "2d8f91c",
+          "message": "feat: bump version to v1.1 and stabilize build toolchain configurations",
+          "author": "parikesitad-pm",
+          "date": "2026-09-05"
+        },
+        {
+          "hash": "16a286d",
+          "message": "feat: initial commit for Smart Auto Downloader v1",
+          "author": "parikesitad-pm",
+          "date": "2026-09-05"
+        }
+      ]
+    },
     {
       "version": "v1.0.0",
       "releaseDate": "2026-09-05",
       "commitHash": "a1c3e4f",
       "tagline": "Official Release v1 with Tauri v2 Async Engine & Multi-Platform Pipeline",
-      "isCurrent": true,
+      "isCurrent": false,
       "whatsNew": [
         "Modern Gemini-inspired Desktop UI with frosted glassmorphism & dual dynamic themes.",
         "Full 4K Ultra HD (2160p) and 2K (1440p) direct downloading pipeline with zero quality loss.",

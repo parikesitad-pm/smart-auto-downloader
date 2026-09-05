@@ -25,7 +25,10 @@ export const useVersionStore = create<VersionState>()(
       setEdition: (edition) => set({ edition }),
       toggleEdition: () =>
         set((state) => ({
-          edition: state.edition === 'Community Free' ? 'Pro Studio' : 'Community Free',
+          edition:
+            state.edition === 'Community Free'
+              ? 'Pro Studio'
+              : 'Community Free',
         })),
       setChangelogOpen: (open) => set({ isChangelogOpen: open }),
       setHelpOpen: (open) => set({ isHelpOpen: open }),
