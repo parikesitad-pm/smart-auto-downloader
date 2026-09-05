@@ -114,9 +114,9 @@ export const openDownloadFolderNative = async (
     }
     alert(
       `[Mode Browser Web]\n` +
-      `File berhasil disimpan di folder Downloads bawaan browser Anda.\n\n` +
-      `Target konfigurasi path lokal:\n${target}\n\n` +
-      `(Path ini telah otomatis disalin ke Clipboard Anda)`
+        `File berhasil disimpan di folder Downloads bawaan browser Anda.\n\n` +
+        `Target konfigurasi path lokal:\n${target}\n\n` +
+        `(Path ini telah otomatis disalin ke Clipboard Anda)`
     );
     return true;
   }
@@ -223,19 +223,21 @@ export const triggerDownload = async (
 
         // Trigger real browser download so the user actually receives a physical file on disk
         const ext = item.formatType === 'audio' ? 'mp3' : 'mp4';
-        const cleanName = item.title.replace(/[^a-zA-Z0-9_\-\s]/g, '_').trim() || 'media_download';
+        const cleanName =
+          item.title.replace(/[^a-zA-Z0-9_\-\s]/g, '_').trim() ||
+          'media_download';
         const fileName = `${cleanName}.${ext}`;
 
         try {
           const sampleBlob = new Blob(
             [
               `[Smart Auto Downloader v2.0 - Development Simulation File]\n\n` +
-              `Judul Media: ${item.title}\n` +
-              `Platform: ${item.platform}\n` +
-              `Format: ${item.formatType.toUpperCase()} (${item.videoQuality || item.audioFormat})\n` +
-              `URL Asal: ${item.url}\n` +
-              `Waktu Unduh: ${new Date().toLocaleString()}\n` +
-              `Status: Berhasil diunduh melalui mode Browser Dev Simulator.\n`
+                `Judul Media: ${item.title}\n` +
+                `Platform: ${item.platform}\n` +
+                `Format: ${item.formatType.toUpperCase()} (${item.videoQuality || item.audioFormat})\n` +
+                `URL Asal: ${item.url}\n` +
+                `Waktu Unduh: ${new Date().toLocaleString()}\n` +
+                `Status: Berhasil diunduh melalui mode Browser Dev Simulator.\n`,
             ],
             { type: item.formatType === 'audio' ? 'audio/mpeg' : 'video/mp4' }
           );
