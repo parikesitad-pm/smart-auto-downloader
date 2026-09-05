@@ -11,7 +11,8 @@ export const isTauriEnvironment = (): boolean => {
 
 // Robust YouTube Video ID extractor
 export const extractYouTubeVideoId = (url: string): string | null => {
-  const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const regExp =
+    /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const match = url.match(regExp);
   return match && match[1] ? match[1] : null;
 };
@@ -61,7 +62,10 @@ export const fetchMediaMetadata = async (
         })),
       };
     } catch (err) {
-      console.warn('Tauri fetch_media_preview failed, trying oEmbed fallback:', err);
+      console.warn(
+        'Tauri fetch_media_preview failed, trying oEmbed fallback:',
+        err
+      );
     }
   }
 
@@ -134,8 +138,19 @@ export const openDownloadFolderNative = async (
       return false;
     }
   } else {
-    // In Browser Dev Mode, filesystem explorer cannot be invoked by sandboxed web JS.
-    // Copy path to clipboard and show interactive alert/toast
+    // Try to open folder and reveal file natively via Vite dev server endpoint
+    try {
+      const res = await fetch('/api/open-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: folderPath }),
+      });
+      if (res.ok) return true;
+    } catch (e) {
+      console.warn('Failed to open folder via dev API:', e);
+    }
+
+    // Fallback if server endpoint unreachable: copy path to clipboard & show alert
     const target = folderPath || 'C:/Downloads/SmartAutoDownloader';
     try {
       if (navigator.clipboard) {
@@ -145,10 +160,9 @@ export const openDownloadFolderNative = async (
       // ignore clipboard error
     }
     alert(
-      `[Mode Browser Web]\n` +
-        `File berhasil disimpan di folder Downloads bawaan browser Anda.\n\n` +
-        `Target konfigurasi path lokal:\n${target}\n\n` +
-        `(Path ini telah otomatis disalin ke Clipboard Anda)`
+      `[Folder Unduhan Media]\n` +
+      `File tersimpan di:\n${target}\n\n` +
+      `(Lokasi path telah disalin ke Clipboard)`
     );
     return true;
   }
@@ -209,7 +223,7 @@ export const setupTauriProgressListener = async (
   return () => {};
 };
 
-// Dispatch download command to Rust backend (or simulate in web mode)
+// Dispatch download command to Rust backend (or real yt-dlp binary via Vite dev API)
 export const triggerDownload = async (
   item: DownloadItem,
   onProgress: (progress: Partial<DownloadProgress>) => void,
@@ -236,81 +250,73 @@ export const triggerDownload = async (
       onError(err?.toString() || 'Failed to start download via Rust backend');
     }
   } else {
-    // High-fidelity web simulator for development and instant UI feedback
-    console.info(`[Dev Simulator] Simulating download for: ${item.title}`);
-    let percent = 0;
-    const totalBytes = 45 * 1024 * 1024; // 45 MB mock
-    const timer = setInterval(() => {
-      percent += Math.floor(Math.random() * 8) + 4;
-      if (percent >= 100) {
-        clearInterval(timer);
-        onProgress({
-          percentage: 100,
-          downloadedBytes: totalBytes,
-          totalBytes,
-          speedBytesPerSec: 0,
-          etaSeconds: 0,
-          currentStep: 'Completed & Muxed',
-        });
+    // Real yt-dlp binary execution via Vite Dev Server API!
+    console.info(`[Real Dev Engine] Downloading original video: ${item.title}`);
+    try {
+      const response = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: item.url,
+          formatType: item.formatType,
+          videoQuality: item.videoQuality,
+          audioFormat: item.audioFormat,
+          outputDir: outputDir,
+        }),
+      });
 
-        // Preserve exact title while stripping only illegal Windows filesystem characters: \ / : * ? " < > |
-        const ext = item.formatType === 'audio' ? 'mp3' : 'mp4';
-        const safeTitle = (item.title || 'media_download')
-          .replace(/[\\/:*?"<>|]/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-        const fileName = `${safeTitle || 'video_download'}.${ext}`;
-
-        try {
-          const sampleBlob = new Blob(
-            [
-              `[Smart Auto Downloader v2.0 - Development Simulation File]\n\n` +
-                `Judul Media: ${item.title}\n` +
-                `Platform: ${item.platform}\n` +
-                `Format: ${item.formatType.toUpperCase()} (${item.videoQuality || item.audioFormat})\n` +
-                `URL Asal: ${item.url}\n` +
-                `Waktu Unduh: ${new Date().toLocaleString()}\n` +
-                `Status: Berhasil diunduh melalui mode Browser Dev Simulator.\n`,
-            ],
-            { type: item.formatType === 'audio' ? 'audio/mpeg' : 'video/mp4' }
-          );
-          const blobUrl = URL.createObjectURL(sampleBlob);
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-        } catch (e) {
-          console.warn('Failed to trigger browser download:', e);
-        }
-
-        const simulatedPath = `C:/Downloads/SmartAutoDownloader/${fileName}`;
-        onComplete(simulatedPath);
-      } else {
-        const speed = (Math.random() * 3.5 + 4.2) * 1024 * 1024; // ~4.5 - 7.5 MB/s
-        const remainingBytes = totalBytes * (1 - percent / 100);
-        const eta = Math.ceil(remainingBytes / speed);
-
-        let step = 'Downloading video stream...';
-        if (percent > 60 && item.formatType === 'video') {
-          step = 'Downloading separate high-res audio track...';
-        }
-        if (percent > 90 && item.formatType === 'video') {
-          step = 'Auto-muxing video & audio with FFmpeg...';
-        }
-
-        onProgress({
-          percentage: percent,
-          downloadedBytes: Math.floor((totalBytes * percent) / 100),
-          totalBytes,
-          speedBytesPerSec: speed,
-          etaSeconds: eta,
-          currentStep: step,
-        });
+      if (!response.ok || !response.body) {
+        throw new Error(`Dev server error: ${response.statusText}`);
       }
-    }, 450);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(trimmed.slice(6));
+              if (data.type === 'progress') {
+                onProgress({
+                  percentage: data.percentage,
+                  downloadedBytes: data.downloadedBytes,
+                  totalBytes: data.totalBytes,
+                  speedBytesPerSec: data.speedBytesPerSec,
+                  etaSeconds: data.etaSeconds,
+                  currentStep: data.currentStep,
+                });
+              } else if (data.type === 'complete') {
+                onProgress({
+                  percentage: 100,
+                  speedBytesPerSec: 0,
+                  etaSeconds: 0,
+                  currentStep: 'Video Asli Berhasil Diunduh & Dimux!',
+                });
+                onComplete(data.outputPath);
+              } else if (data.type === 'error') {
+                onError(data.error || 'Gagal mengunduh video asli');
+              }
+            } catch (e) {
+              console.warn('Failed to parse SSE chunk:', e);
+            }
+          }
+        }
+      }
+      return;
+    } catch (err: any) {
+      console.warn('Real dev download failed:', err);
+      onError(err?.message || 'Gagal mengunduh video via engine dev');
+    }
   }
 };
 
