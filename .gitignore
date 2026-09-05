@@ -24,3 +24,9 @@ src-tauri/bin/*
 *.njsproj
 *.sln
 *.sw?
+
+target/
+src-tauri/target/
+*.exe
+*.pdb
+node_modules/

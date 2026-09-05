@@ -1,13 +1,44 @@
 {
-  "latestVersion": "1.1.0",
-  "currentVersion": "1.1.0",
+  "latestVersion": "1.2.0",
+  "currentVersion": "1.2.0",
   "releases": [
+    {
+      "version": "v1.2.0",
+      "releaseDate": "2026-09-05",
+      "commitHash": "b3e18a9",
+      "tagline": "Full Cross-Platform Matrix (Windows, macOS, Linux) & Native Icon Pipeline",
+      "isCurrent": true,
+      "whatsNew": [
+        "Comprehensive cross-platform build and installation guides for Windows (.msi/.exe), macOS (.dmg/.app), and Linux (.deb/.AppImage).",
+        "Automated multi-resolution desktop icon suite (ICO, ICNS, PNG 32x32 to 512x512, iOS/Android assets) generated from vector master.",
+        "Integrated cross-platform prerequisite resolver for WebKit2GTK (Linux), MSVC (Windows), and Xcode Command Line Tools (macOS)."
+      ],
+      "improvementsAndFixes": [
+        "Updated Tauri backend configuration for strict multi-target packaging.",
+        "Stabilized Cargo compilation pipeline with active Rust 1.98 toolchain on Windows.",
+        "Documented exact step-by-step roadmap for future minor (v1.3, v1.4...) and major (v2.0) version increments."
+      ],
+      "commitLog": [
+        {
+          "hash": "b3e18a9",
+          "message": "docs: add exhaustive multi-platform install/use guides for Windows, macOS, Linux and bump to v1.2",
+          "author": "parikesitad-pm",
+          "date": "2026-09-05"
+        },
+        {
+          "hash": "8c42a1f",
+          "message": "feat: generate native cross-platform icon assets and configure Tauri packager",
+          "author": "parikesitad-pm",
+          "date": "2026-09-05"
+        }
+      ]
+    },
     {
       "version": "v1.1.0",
       "releaseDate": "2026-09-05",
       "commitHash": "2d8f91c",
       "tagline": "Build System Stabilization & Incremental Versioning Pipeline",
-      "isCurrent": true,
+      "isCurrent": false,
       "whatsNew": [
         "Dynamic incremental versioning policy: automatically tracks minor patches (v1.1, v1.2...) and major revisions (v2.0).",
         "Automated Rust & Cargo toolchain diagnostic checker for smooth desktop compilation.",

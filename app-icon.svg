@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="40%" stop-color="#312e81" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="50%" stop-color="#9333ea" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e7ff" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#bgGrad)" stroke="#4338ca" stroke-width="4" />
+
+  <!-- Glowing Accent Ring -->
+  <rect x="48" y="48" width="416" height="416" rx="96" fill="none" stroke="url(#geminiGrad)" stroke-width="6" opacity="0.6" filter="url(#glow)" />
+
+  <!-- Download Arrow & Tray -->
+  <g transform="translate(256, 256)">
+    <!-- Central Hexagon / Disc -->
+    <circle cx="0" cy="0" r="140" fill="url(#geminiGrad)" opacity="0.2" />
+
+    <!-- Tray -->
+    <path d="M -90 60 L -90 85 C -90 100 -75 110 -60 110 L 60 110 C 75 110 90 100 90 85 L 90 60" fill="none" stroke="url(#arrowGrad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Arrow Stem -->
+    <line x1="0" y1="-80" x2="0" y2="40" stroke="url(#arrowGrad)" stroke-width="24" stroke-linecap="round" />
+
+    <!-- Arrow Head -->
+    <path d="M -50 -5 L 0 45 L 50 -5" fill="none" stroke="url(#arrowGrad)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Sparkle Star -->
+    <path d="M 80 -80 Q 80 -60 100 -60 Q 80 -60 80 -40 Q 80 -60 60 -60 Q 80 -60 80 -80 Z" fill="#f43f5e" filter="url(#glow)" />
+    <path d="M -70 -70 Q -70 -55 -55 -55 Q -70 -55 -70 -40 Q -70 -55 -85 -55 Q -70 -55 -70 -70 Z" fill="#38bdf8" filter="url(#glow)" />
+  </g>
+</svg>
