@@ -33,6 +33,24 @@ function Set-ContentNoBOM([string]$path, [string]$content) {
     [System.IO.File]::WriteAllText($fullPath, $content, [System.Text.UTF8Encoding]::new($false))
 }
 
+function Get-Sha256Checksum([string]$filePath) {
+    if (Get-Command Get-FileHash -ErrorAction SilentlyContinue) {
+        try {
+            return (Get-FileHash -Path $filePath -Algorithm SHA256).Hash
+        } catch {}
+    }
+    # Universal .NET fallback for all PowerShell versions
+    $fullPath = [System.IO.Path]::GetFullPath($filePath)
+    $stream = [System.IO.File]::OpenRead($fullPath)
+    try {
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
+        $hashBytes = $sha256.ComputeHash($stream)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "").ToUpper()
+    } finally {
+        $stream.Close()
+    }
+}
+
 Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "   SMART AUTO DOWNLOADER - BUILD & RELEASE PIPELINE    " -ForegroundColor Cyan
 Write-Host "=======================================================" -ForegroundColor Cyan
@@ -206,7 +224,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # -----------------------------------------------------------------------------
-# STEP 4: POST-BUILD VERSIONED DIRECTORY & AUTO-RENAME
+# STEP 4: POST-BUILD VERSIONED DIRECTORY & AUTO-RENAME (CROSS-PLATFORM)
 # -----------------------------------------------------------------------------
 Write-Host "-------------------------------------------------------"
 Write-Host "Menyusun folder rilis: releases/$tagVersion/..." -ForegroundColor Cyan
@@ -216,12 +234,31 @@ if (-not (Test-Path $releaseDir)) {
     New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 }
 
+# --- 1. WINDOWS ARTIFACTS (.exe, .zip, .msi, installer) ---
 $binSource = "src-tauri/target/release/smart-auto-downloader.exe"
 $binTarget = "$releaseDir/smart-auto-downloader-$tagVersion-windows-x64.exe"
 
 if (Test-Path $binSource) {
     Copy-Item -Path $binSource -Destination $binTarget -Force
-    Write-Host "[OK] Biner standalone tersimpan: $binTarget" -ForegroundColor Green
+    Write-Host "[OK] Biner standalone Windows tersimpan: $binTarget" -ForegroundColor Green
+
+    # Otomatis kemas ke berkas ZIP untuk Windows
+    $zipTarget = "$releaseDir/smart-auto-downloader-$tagVersion-windows-x64.zip"
+    if (Test-Path $zipTarget) { Remove-Item $zipTarget -Force }
+    try {
+        if (Get-Command Compress-Archive -ErrorAction SilentlyContinue) {
+            Compress-Archive -Path $binTarget -DestinationPath $zipTarget -Force
+            Write-Host "[OK] ZIP Portable Windows tersimpan: $zipTarget" -ForegroundColor Green
+        } else {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            $zip = [System.IO.Compression.ZipFile]::Open($zipTarget, [System.IO.Compression.ZipArchiveMode]::Create)
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $binTarget, (Split-Path $binTarget -Leaf))
+            $zip.Dispose()
+            Write-Host "[OK] ZIP Portable Windows tersimpan (.NET): $zipTarget" -ForegroundColor Green
+        }
+    } catch {
+        Write-Warning "Gagal membuat berkas ZIP otomatis: $_"
+    }
 }
 
 # Copy installer NSIS (.exe)
@@ -230,7 +267,7 @@ if ($nsisFiles) {
     $latestNsis = $nsisFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     $nsisTarget = "$releaseDir/smart-auto-downloader-$tagVersion-installer-setup.exe"
     Copy-Item -Path $latestNsis.FullName -Destination $nsisTarget -Force
-    Write-Host "[OK] NSIS Installer tersimpan: $nsisTarget" -ForegroundColor Green
+    Write-Host "[OK] NSIS Installer Windows tersimpan: $nsisTarget" -ForegroundColor Green
 }
 
 # Copy installer MSI (.msi) jika ada
@@ -239,11 +276,51 @@ if ($msiFiles) {
     $latestMsi = $msiFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     $msiTarget = "$releaseDir/smart-auto-downloader-$tagVersion-installer.msi"
     Copy-Item -Path $latestMsi.FullName -Destination $msiTarget -Force
-    Write-Host "[OK] MSI Installer tersimpan: $msiTarget" -ForegroundColor Green
+    Write-Host "[OK] MSI Installer Windows tersimpan: $msiTarget" -ForegroundColor Green
+}
+
+# --- 2. macOS ARTIFACTS (.dmg & .app) ---
+$dmgFiles = Get-ChildItem -Path "src-tauri/target/release/bundle/dmg/*.dmg" -ErrorAction SilentlyContinue
+if ($dmgFiles) {
+    $latestDmg = $dmgFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $dmgTarget = "$releaseDir/smart-auto-downloader-$tagVersion-macos.dmg"
+    Copy-Item -Path $latestDmg.FullName -Destination $dmgTarget -Force
+    Write-Host "[OK] macOS DMG Installer tersimpan: $dmgTarget" -ForegroundColor Green
+}
+
+$macosApp = Get-ChildItem -Path "src-tauri/target/release/bundle/macos" -Directory -Filter "*.app" -ErrorAction SilentlyContinue
+if ($macosApp) {
+    $appTarget = "$releaseDir/smart-auto-downloader-$tagVersion-macos.app"
+    Copy-Item -Path $macosApp.FullName -Destination $appTarget -Recurse -Force
+    Write-Host "[OK] macOS App Package tersimpan: $appTarget" -ForegroundColor Green
+}
+
+# --- 3. LINUX ARTIFACTS (.AppImage 'app langsung jalan', .deb, & standalone ELF) ---
+$appImageFiles = Get-ChildItem -Path "src-tauri/target/release/bundle/appimage/*.AppImage" -ErrorAction SilentlyContinue
+if ($appImageFiles) {
+    $latestAppImage = $appImageFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $appImageTarget = "$releaseDir/smart-auto-downloader-$tagVersion-linux-x86_64.AppImage"
+    Copy-Item -Path $latestAppImage.FullName -Destination $appImageTarget -Force
+    Write-Host "[OK] Linux AppImage (App langsung) tersimpan: $appImageTarget" -ForegroundColor Green
+}
+
+$debFiles = Get-ChildItem -Path "src-tauri/target/release/bundle/deb/*.deb" -ErrorAction SilentlyContinue
+if ($debFiles) {
+    $latestDeb = $debFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $debTarget = "$releaseDir/smart-auto-downloader-$tagVersion-linux-amd64.deb"
+    Copy-Item -Path $latestDeb.FullName -Destination $debTarget -Force
+    Write-Host "[OK] Linux DEB Package tersimpan: $debTarget" -ForegroundColor Green
+}
+
+$linuxElf = "src-tauri/target/release/smart-auto-downloader"
+if ((Test-Path $linuxElf) -and -not (Test-Path "$linuxElf.exe")) {
+    $linuxBinTarget = "$releaseDir/smart-auto-downloader-$tagVersion-linux-x86_64"
+    Copy-Item -Path $linuxElf -Destination $linuxBinTarget -Force
+    Write-Host "[OK] Linux Biner Standalone tersimpan: $linuxBinTarget" -ForegroundColor Green
 }
 
 # -----------------------------------------------------------------------------
-# STEP 5: GENERATE SHA256 CHECKSUMS
+# STEP 5: GENERATE SHA256 CHECKSUMS (UNIVERSAL & ROBUST)
 # -----------------------------------------------------------------------------
 Write-Host "-------------------------------------------------------"
 Write-Host "Menghitung SHA256 Checksums..." -ForegroundColor Cyan
@@ -252,7 +329,7 @@ $checksumPath = "$releaseDir/checksums.txt"
 $checksumLines = @()
 
 Get-ChildItem -Path $releaseDir -File | Where-Object { $_.Name -ne "checksums.txt" } | ForEach-Object {
-    $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
+    $hash = Get-Sha256Checksum $_.FullName
     $line = "$hash  $($_.Name)"
     $checksumLines += $line
 }
