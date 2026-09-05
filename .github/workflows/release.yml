@@ -1,0 +1,64 @@
+name: 'Release Desktop App'
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*'
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and Publish Tauri Desktop App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Smart Auto Downloader ${{ github.ref_name }}'
+          releaseBody: |
+            ## 🚀 Smart Auto Downloader ${{ github.ref_name }}
+
+            Silakan unduh file installer di bawah:
+            - **Setup Installer (.exe)**: `Smart Auto Downloader_${{ github.ref_name }}_x64-setup.exe`
+            - **Enterprise MSI (.msi)**: `Smart Auto Downloader_${{ github.ref_name }}_x64_en-US.msi`
+
+            ### Fitur Utama:
+            - Unduh Video YouTube (hingga 4K Ultra HD), Shorts, Instagram Reels, TikTok (No-Watermark).
+            - Audio Studio Converter (MP3 320k, M4A, WAV).
+            - Realtime speed & progress indicator.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
