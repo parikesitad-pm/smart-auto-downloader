@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri & Rust
+src-tauri/target/
+src-tauri/bin/*
+!src-tauri/bin/.gitkeep
+
+# Logs & Environment
+*.log
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

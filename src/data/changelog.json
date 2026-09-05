@@ -1,0 +1,115 @@
+{
+  "latestVersion": "1.0.0",
+  "currentVersion": "1.0.0",
+  "releases": [
+    {
+      "version": "v1.0.0",
+      "releaseDate": "2026-09-05",
+      "commitHash": "a1c3e4f",
+      "tagline": "Official Release v1 with Tauri v2 Async Engine & Multi-Platform Pipeline",
+      "isCurrent": true,
+      "whatsNew": [
+        "Modern Gemini-inspired Desktop UI with frosted glassmorphism & dual dynamic themes.",
+        "Full 4K Ultra HD (2160p) and 2K (1440p) direct downloading pipeline with zero quality loss.",
+        "Instant Audio-Only Studio Converter: MP3 (320kbps/192kbps), pristine M4A, and studio WAV.",
+        "TikTok No-Watermark high-speed scraper integration with instant CDN link resolver.",
+        "Instagram Reels, Carousels, and single video post downloader with automated session header spoofing.",
+        "WhatsApp Status Reader for local cache retrieval (Images, Videos, and Voice status).",
+        "Automated FFmpeg sidecar muxing for synchronizing high-bitrate separate video & audio streams."
+      ],
+      "improvementsAndFixes": [
+        "Migrated core architecture to Tauri v2 Rust for negligible RAM footprint (~35MB idle).",
+        "Real-time streaming stdout regex parser with instant ETA, percentage, and MB/s download speed metrics.",
+        "Resolved YouTube signature deciphering delay on age-restricted and music videos.",
+        "Graceful handling and user-friendly toasts for rate-limiting (HTTP 429), private media, and disk space limits.",
+        "Added Git short commit hash build injection for total transparency across dev/production builds."
+      ],
+      "commitLog": [
+        {
+          "hash": "a1c3e4f",
+          "message": "feat: release v1.0.0 with Tauri v2 async sidecar and dual-theme UI",
+          "author": "parikesitad-pm",
+          "date": "2026-09-05"
+        },
+        {
+          "hash": "7d9b231",
+          "message": "feat: implement WhatsApp status local cache viewer & exporter",
+          "author": "parikesitad-pm",
+          "date": "2026-09-04"
+        },
+        {
+          "hash": "4f2e10a",
+          "message": "perf: optimize regex stream parser for yt-dlp download progress events",
+          "author": "parikesitad-pm",
+          "date": "2026-09-03"
+        },
+        {
+          "hash": "b8a914c",
+          "message": "ui: add Gemini edition badge and Framer Motion modal animations",
+          "author": "parikesitad-pm",
+          "date": "2026-09-02"
+        }
+      ]
+    },
+    {
+      "version": "v0.9.5-beta",
+      "releaseDate": "2026-08-20",
+      "commitHash": "e83d91b",
+      "tagline": "Public Beta Testing & FFmpeg Auto-Muxing Engine",
+      "isCurrent": false,
+      "whatsNew": [
+        "Integrated FFmpeg sidecar pipeline for cross-platform container merging (MP4/MKV).",
+        "Interactive Queue Management with pause, resume, cancel, and clear completed controls.",
+        "Format selector dropdown supporting 1080p, 720p, 480p, and standard audio."
+      ],
+      "improvementsAndFixes": [
+        "Fixed Windows UNC path parsing issue when saving files with non-ASCII or emoji titles.",
+        "Reduced CPU throttling during multi-part file downloads.",
+        "Enhanced error recovery when internet connectivity drops temporarily during large 4K files."
+      ],
+      "commitLog": [
+        {
+          "hash": "e83d91b",
+          "message": "fix: resolve path escaping on Windows when title contains emojis",
+          "author": "parikesitad-pm",
+          "date": "2026-08-20"
+        },
+        {
+          "hash": "c3182ab",
+          "message": "feat: add FFmpeg sidecar auto-muxing for separate audio/video streams",
+          "author": "parikesitad-pm",
+          "date": "2026-08-18"
+        },
+        {
+          "hash": "19f0412",
+          "message": "refactor: convert state management to Zustand 5 with local persistence",
+          "author": "parikesitad-pm",
+          "date": "2026-08-15"
+        }
+      ]
+    },
+    {
+      "version": "v0.9.0-alpha",
+      "releaseDate": "2026-08-01",
+      "commitHash": "9b02ef3",
+      "tagline": "Initial Architectural Prototype & Proof of Concept",
+      "isCurrent": false,
+      "whatsNew": [
+        "Initial proof of concept for YouTube video downloads via yt-dlp.",
+        "Basic React + Tailwind CSS layout with dark mode support."
+      ],
+      "improvementsAndFixes": [
+        "Established Atomic Design folder hierarchy in React frontend.",
+        "Set up Tauri IPC command communication channel."
+      ],
+      "commitLog": [
+        {
+          "hash": "9b02ef3",
+          "message": "init: scaffold repository with Tauri v2 and React Vite setup",
+          "author": "parikesitad-pm",
+          "date": "2026-08-01"
+        }
+      ]
+    }
+  ]
+}
