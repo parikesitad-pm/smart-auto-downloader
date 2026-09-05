@@ -13,6 +13,7 @@ import { URLInputBar } from '../components/molecules/URLInputBar';
 import { FormatSelector } from '../components/molecules/FormatSelector';
 import { Button } from '../components/atoms/Button';
 import { useDownloadStore } from '../store/downloadStore';
+import { useTranslation } from '../store/languageStore';
 import { triggerDownload } from '../services/tauri';
 import { AudioFormat, DownloadFormatType, VideoQuality } from '../types/download';
 import { detectPlatform } from '../services/platformDetector';
@@ -22,6 +23,7 @@ export interface DownloaderPageProps {
 }
 
 export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueue }) => {
+  const { t } = useTranslation();
   const [url, setUrl] = useState('');
   const [formatType, setFormatType] = useState<DownloadFormatType>('video');
   const [videoQuality, setVideoQuality] = useState<VideoQuality>('best');
@@ -120,15 +122,15 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
         <div className="relative z-10 space-y-2">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-xs font-semibold text-purple-600 dark:text-purple-300">
             <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-            <span>Smart Multi-Platform Engine v1</span>
+            <span>{t('downloader.heroTag')}</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            Download Any Video or Audio in Maximum Quality
+            {t('downloader.heroTitle')}
           </h2>
 
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
-            Directly supports YouTube (4K & Shorts), Instagram Reels, TikTok (No-Watermark), and WhatsApp Status with instant FFmpeg auto-muxing.
+            {t('downloader.heroSubtitle')}
           </p>
         </div>
 
@@ -161,7 +163,7 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
       <div className="space-y-3">
         <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
           <PlaySquare className="w-3.5 h-3.5 text-purple-500" />
-          <span>Media Source Link</span>
+          <span>{t('downloader.sourceLinkLabel')}</span>
         </label>
 
         <URLInputBar
@@ -173,7 +175,7 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
 
         {/* Quick sample chips */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-muted-foreground">
-          <span className="font-medium text-foreground/70">Quick tests:</span>
+          <span className="font-medium text-foreground/70">{t('downloader.quickTests')}</span>
           <button
             type="button"
             onClick={() => handleSampleClick('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}
@@ -219,7 +221,7 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
           className="w-full h-13 text-sm font-bold rounded-2xl gap-2 shadow-lg shadow-purple-500/25 cursor-pointer"
         >
           <Download className="w-5 h-5" />
-          <span>Start Download & Muxing</span>
+          <span>{isProcessing ? t('downloader.btnAnalyzing') : t('downloader.btnStartDownload')}</span>
         </Button>
       </div>
 
@@ -228,30 +230,30 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
         <div className="p-3.5 rounded-2xl border border-border/60 bg-card/60 space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
             <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span>4K Ultra HD Engine</span>
+            <span>{t('downloader.feature4kTitle')}</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Extracts pristine 2160p resolution with zero compression artefacts.
+            {t('downloader.feature4kDesc')}
           </p>
         </div>
 
         <div className="p-3.5 rounded-2xl border border-border/60 bg-card/60 space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
             <Share2 className="w-3.5 h-3.5 text-blue-500" />
-            <span>No-Watermark TikTok</span>
+            <span>{t('downloader.featureTiktokTitle')}</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Removes brand overlays and saves videos directly in crisp MP4 format.
+            {t('downloader.featureTiktokDesc')}
           </p>
         </div>
 
         <div className="p-3.5 rounded-2xl border border-border/60 bg-card/60 space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
             <FolderSync className="w-3.5 h-3.5 text-emerald-500" />
-            <span>WhatsApp Status Extractor</span>
+            <span>{t('downloader.featureWaTitle')}</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Reads local status cache before 24h expiration automatically.
+            {t('downloader.featureWaDesc')}
           </p>
         </div>
       </div>

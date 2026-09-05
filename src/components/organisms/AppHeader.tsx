@@ -3,7 +3,9 @@ import { Download, Sparkles, Layers, History, Settings } from 'lucide-react';
 import { VersionCommitBadge } from '../molecules/VersionCommitBadge';
 import { StatusIndicator } from '../atoms/StatusIndicator';
 import { ThemeToggle } from '../molecules/ThemeToggle';
+import { LanguageSelector } from '../molecules/LanguageSelector';
 import { useDownloadStore } from '../../store/downloadStore';
+import { useTranslation } from '../../store/languageStore';
 
 export interface AppHeaderProps {
   activeTab: 'downloader' | 'queue' | 'history' | 'settings';
@@ -12,6 +14,7 @@ export interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) => {
   const { queue, history } = useDownloadStore();
+  const { t } = useTranslation();
   const activeDownloadsCount = queue.filter(
     (i) => i.status === 'downloading' || i.status === 'queued'
   ).length;
@@ -32,13 +35,13 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) 
           <div className="flex flex-col">
             <div className="flex items-center gap-2.5">
               <h1 className="text-base font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text">
-                Smart Auto Downloader
+                {t('header.appName')}
               </h1>
               {/* Gemini-styled Edition Pill Badge */}
               <VersionCommitBadge />
             </div>
             <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-              Cross-Platform Desktop Engine <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+              {t('header.subtitle')} <Sparkles className="w-2.5 h-2.5 text-purple-400" />
             </span>
           </div>
         </div>
@@ -55,7 +58,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) 
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Downloader</span>
+            <span>{t('header.navDownloader')}</span>
           </button>
 
           <button
@@ -68,7 +71,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) 
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Queue</span>
+            <span>{t('header.navQueue')}</span>
             {activeDownloadsCount > 0 && (
               <span className="ml-1 px-1.5 py-0.2 rounded-full bg-purple-500 text-[10px] text-white font-bold animate-pulse">
                 {activeDownloadsCount}
@@ -86,7 +89,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) 
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>History</span>
+            <span>{t('header.navHistory')}</span>
             {history.length > 0 && (
               <span className="ml-1 px-1.5 py-0.2 rounded-full bg-muted text-[10px] text-muted-foreground">
                 {history.length}
@@ -104,12 +107,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ activeTab, onTabChange }) 
             }`}
           >
             <Settings className="w-3.5 h-3.5" />
-            <span>Settings</span>
+            <span>{t('header.navSettings')}</span>
           </button>
         </nav>
 
-        {/* Right: Backend Status Indicator & Theme Toggle */}
-        <div className="flex items-center gap-3">
+        {/* Right: Language Selector, Backend Status Indicator & Theme Toggle */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <LanguageSelector />
+          <div className="h-4 w-px bg-border/60" />
           <StatusIndicator />
           <div className="h-4 w-px bg-border/60" />
           <ThemeToggle />

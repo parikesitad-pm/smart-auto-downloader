@@ -3,11 +3,13 @@ import { BookOpen, Sparkles } from 'lucide-react';
 import { Watermark } from '../atoms/Watermark';
 import { VersionTag } from '../atoms/VersionTag';
 import { useVersionStore } from '../../store/versionStore';
+import { useTranslation } from '../../store/languageStore';
 
 export const AppFooter: React.FC<{ className?: string }> = ({
   className = '',
 }) => {
   const { setChangelogOpen, setHelpOpen } = useVersionStore();
+  const { t } = useTranslation();
 
   return (
     <footer
@@ -20,7 +22,7 @@ export const AppFooter: React.FC<{ className?: string }> = ({
           <span className="hidden sm:inline text-border">•</span>
           <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground/80">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>Tauri v2 + Rust Core</span>
+            <span>{t('footer.backendCore')}</span>
           </div>
         </div>
 
@@ -37,7 +39,7 @@ export const AppFooter: React.FC<{ className?: string }> = ({
             title="View update history, new features, and git commits"
           >
             <Sparkles className="w-3 h-3 text-pink-500" />
-            <span>Changelog & Updates</span>
+            <span>{t('footer.btnChangelog')}</span>
           </button>
 
           {/* Interactive Trigger: Help & Docs */}
@@ -48,7 +50,7 @@ export const AppFooter: React.FC<{ className?: string }> = ({
             title="Open user guide and supported platforms"
           >
             <BookOpen className="w-3 h-3 text-muted-foreground" />
-            <span>Help & Docs</span>
+            <span>{t('footer.btnHelp')}</span>
           </button>
         </div>
       </div>

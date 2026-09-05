@@ -7,15 +7,20 @@ import { HistoryTable } from './components/organisms/HistoryTable';
 import { setupTauriProgressListener } from './services/tauri';
 import { useDownloadStore } from './store/downloadStore';
 import { useThemeStore } from './store/themeStore';
+import { useVersionStore } from './store/versionStore';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'downloader' | 'queue' | 'history' | 'settings'>('downloader');
+  const [activeTab, setActiveTab] = useState<
+    'downloader' | 'queue' | 'history' | 'settings'
+  >('downloader');
   const { updateProgress, updateStatus } = useDownloadStore();
   const { theme, setTheme } = useThemeStore();
+  const { initVersion } = useVersionStore();
 
   useEffect(() => {
-    // Re-synchronize theme on mount
+    // Re-synchronize theme and dynamic app version on mount
     setTheme(theme);
+    initVersion();
 
     // Setup Tauri v2 backend event listener
     let cleanup: (() => void) | undefined;

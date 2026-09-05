@@ -1,8 +1,10 @@
 import React from 'react';
 import { useDownloadStore } from '../../store/downloadStore';
+import { useTranslation } from '../../store/languageStore';
 
 export const StatusIndicator: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { backendStatus, statusMessage } = useDownloadStore();
+  const { t } = useTranslation();
 
   const config = {
     ready: {
@@ -10,7 +12,7 @@ export const StatusIndicator: React.FC<{ className?: string }> = ({ className = 
       border: 'border-emerald-500/30',
       bg: 'bg-emerald-500/10',
       text: 'text-emerald-700 dark:text-emerald-400',
-      label: 'Backend Ready',
+      label: t('header.statusReady'),
       pulse: false,
     },
     downloading: {
@@ -18,7 +20,7 @@ export const StatusIndicator: React.FC<{ className?: string }> = ({ className = 
       border: 'border-blue-500/30',
       bg: 'bg-blue-500/10',
       text: 'text-blue-700 dark:text-blue-400',
-      label: 'Downloading...',
+      label: t('header.statusDownloading'),
       pulse: true,
     },
     error: {
@@ -26,7 +28,7 @@ export const StatusIndicator: React.FC<{ className?: string }> = ({ className = 
       border: 'border-red-500/30',
       bg: 'bg-red-500/10',
       text: 'text-red-700 dark:text-red-400',
-      label: 'Backend Error',
+      label: t('header.statusError'),
       pulse: false,
     },
     initializing: {
@@ -34,7 +36,7 @@ export const StatusIndicator: React.FC<{ className?: string }> = ({ className = 
       border: 'border-amber-500/30',
       bg: 'bg-amber-500/10',
       text: 'text-amber-700 dark:text-amber-400',
-      label: 'Initializing...',
+      label: t('header.statusInitializing'),
       pulse: true,
     },
   }[backendStatus] || {
@@ -42,7 +44,7 @@ export const StatusIndicator: React.FC<{ className?: string }> = ({ className = 
     border: 'border-emerald-500/30',
     bg: 'bg-emerald-500/10',
     text: 'text-emerald-600 dark:text-emerald-400',
-    label: 'Ready',
+    label: t('header.statusReady'),
     pulse: false,
   };
 

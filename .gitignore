@@ -5,6 +5,7 @@ dist-ssr/
 *.local
 
 # Tauri, Rust & Cargo Build Artifacts (Proteksi Anti-Corrupt Index)
+releases/
 target/
 src-tauri/target/
 **/target/

@@ -24,6 +24,11 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
+function Set-ContentNoBOM([string]$path, [string]$content) {
+    $fullPath = [System.IO.Path]::GetFullPath($path)
+    [System.IO.File]::WriteAllText($fullPath, $content, [System.Text.UTF8Encoding]::new($false))
+}
+
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "  SMART AUTO DOWNLOADER - RELEASE HELPER " -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
@@ -81,15 +86,15 @@ Write-Host "-----------------------------------------"
 
 # 3. Update package.json
 $pkg.version = $newVersion
-$pkg | ConvertTo-Json -Depth 10 | Set-Content $pkgPath -Encoding UTF8
+Set-ContentNoBOM $pkgPath ($pkg | ConvertTo-Json -Depth 10)
 Write-Host "[OK] Diperbarui: package.json -> $newVersion" -ForegroundColor Green
 
 # 4. Update src-tauri/Cargo.toml
 $cargoPath = "src-tauri/Cargo.toml"
 if (Test-Path $cargoPath) {
     $cargoContent = Get-Content $cargoPath -Raw
-    $cargoContent = $cargoContent -replace 'version\s*=\s*"[^"]+"', "version = `"$newVersion`""
-    Set-Content -Path $cargoPath -Value $cargoContent -Encoding UTF8
+    $cargoContent = $cargoContent -replace '(?m)^version\s*=\s*"[^"]+"', "version = `"$newVersion`""
+    Set-ContentNoBOM $cargoPath $cargoContent
     Write-Host "[OK] Diperbarui: src-tauri/Cargo.toml -> $newVersion" -ForegroundColor Green
 }
 
@@ -99,7 +104,7 @@ if (Test-Path $tauriConfPath) {
     $tauriContent = Get-Content $tauriConfPath -Raw
     $tauriContent = $tauriContent -replace '"version":\s*"[^"]+"', "`"version`": `"$newVersion`""
     $tauriContent = $tauriContent -replace '"title":\s*"Smart Auto Downloader v[^"]+"', "`"title`": `"Smart Auto Downloader v$major.$minor`""
-    Set-Content -Path $tauriConfPath -Value $tauriContent -Encoding UTF8
+    Set-ContentNoBOM $tauriConfPath $tauriContent
     Write-Host "[OK] Diperbarui: src-tauri/tauri.conf.json -> $newVersion" -ForegroundColor Green
 }
 

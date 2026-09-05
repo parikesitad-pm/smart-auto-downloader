@@ -1,6 +1,7 @@
 import React from 'react';
 import { Film, Music2, Check, Sparkles } from 'lucide-react';
 import { AudioFormat, DownloadFormatType, VideoQuality } from '../../types/download';
+import { useTranslation } from '../../store/languageStore';
 
 export interface FormatSelectorProps {
   formatType: DownloadFormatType;
@@ -19,6 +20,8 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   audioFormat,
   onAudioFormatChange,
 }) => {
+  const { t } = useTranslation();
+
   const videoQualities: { id: VideoQuality; label: string; badge?: string }[] = [
     { id: 'best', label: 'Best Quality', badge: 'Auto Max' },
     { id: '2160p', label: '4K Ultra HD', badge: '2160p' },
@@ -40,7 +43,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
       {/* Format Category Toggle */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Select Output Format
+          {t('downloader.formatSelectionTitle')}
         </span>
 
         <div className="inline-flex rounded-xl bg-muted/60 p-1 border border-border/40">
@@ -54,7 +57,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             }`}
           >
             <Film className="w-3.5 h-3.5 text-blue-500" />
-            <span>Video (MP4)</span>
+            <span>{t('downloader.videoFormat')}</span>
           </button>
 
           <button
@@ -67,7 +70,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
             }`}
           >
             <Music2 className="w-3.5 h-3.5 text-purple-500" />
-            <span>Audio Only</span>
+            <span>{t('downloader.audioFormat')}</span>
           </button>
         </div>
       </div>

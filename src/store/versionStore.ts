@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AppEdition } from '../types/version';
+import { getAppVersion } from '../services/tauri';
 
 interface VersionState {
   edition: AppEdition;
@@ -10,15 +11,21 @@ interface VersionState {
   isHelpOpen: boolean;
   setEdition: (edition: AppEdition) => void;
   toggleEdition: () => void;
+  setVersion: (version: string) => void;
+  initVersion: () => Promise<void>;
   setChangelogOpen: (open: boolean) => void;
   setHelpOpen: (open: boolean) => void;
 }
+
+const defaultVersion = import.meta.env.VITE_APP_VERSION
+  ? `v${import.meta.env.VITE_APP_VERSION}`
+  : 'v1.2.0';
 
 export const useVersionStore = create<VersionState>()(
   persist(
     (set) => ({
       edition: 'Community Free',
-      version: 'v1.0.0',
+      version: defaultVersion,
       commitHash: import.meta.env.VITE_GIT_COMMIT_HASH || 'a1c3e4f',
       isChangelogOpen: false,
       isHelpOpen: false,
@@ -30,6 +37,11 @@ export const useVersionStore = create<VersionState>()(
               ? 'Pro Studio'
               : 'Community Free',
         })),
+      setVersion: (version) => set({ version }),
+      initVersion: async () => {
+        const v = await getAppVersion();
+        if (v) set({ version: v });
+      },
       setChangelogOpen: (open) => set({ isChangelogOpen: open }),
       setHelpOpen: (open) => set({ isHelpOpen: open }),
     }),

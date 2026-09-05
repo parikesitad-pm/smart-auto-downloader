@@ -2,9 +2,11 @@ import React from 'react';
 import { Sparkles } from 'lucide-react';
 import { Badge } from '../atoms/Badge';
 import { useVersionStore } from '../../store/versionStore';
+import { useTranslation } from '../../store/languageStore';
 
 export const VersionCommitBadge: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { edition, version, toggleEdition } = useVersionStore();
+  const { t } = useTranslation();
 
   const isPro = edition === 'Pro Studio';
 
@@ -24,11 +26,11 @@ export const VersionCommitBadge: React.FC<{ className?: string }> = ({ className
           {isPro ? (
             <>
               <Sparkles className="w-3 h-3 text-pink-400 animate-pulse" />
-              <span>{version} Pro Studio</span>
+              <span>{version} {t('header.editionPro')}</span>
             </>
           ) : (
             <>
-              <span>{version} Community</span>
+              <span>{version} {t('header.editionFree')}</span>
             </>
           )}
         </Badge>

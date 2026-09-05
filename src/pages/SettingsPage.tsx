@@ -5,16 +5,20 @@ import {
   Sparkles,
   Layers,
   Info,
+  Globe,
 } from 'lucide-react';
 import { useSettingsStore } from '../store/settingsStore';
 import { useVersionStore } from '../store/versionStore';
+import { useTranslation } from '../store/languageStore';
 import { Button } from '../components/atoms/Button';
 import { Badge } from '../components/atoms/Badge';
+import { LanguageSelector } from '../components/molecules/LanguageSelector';
 import { AudioFormat, VideoQuality } from '../types/download';
 
 export const SettingsPage: React.FC = () => {
   const { settings, updateSettings, resetSettings } = useSettingsStore();
   const { edition, toggleEdition, version, commitHash } = useVersionStore();
+  const { t } = useTranslation();
 
   const isPro = edition === 'Pro Studio';
 
@@ -27,9 +31,9 @@ export const SettingsPage: React.FC = () => {
             <Settings className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-foreground">Preferences & Engine Config</h2>
+            <h2 className="text-base font-bold text-foreground">{t('settings.title')}</h2>
             <p className="text-xs text-muted-foreground">
-              Customize output paths, audio bitrates, and background sidecars
+              {t('settings.subtitle')}
             </p>
           </div>
         </div>
@@ -38,9 +42,9 @@ export const SettingsPage: React.FC = () => {
           variant="ghost"
           size="sm"
           onClick={resetSettings}
-          className="text-xs text-muted-foreground"
+          className="text-xs text-muted-foreground cursor-pointer"
         >
-          Reset Defaults
+          {t('settings.reset')}
         </Button>
       </div>
 
@@ -49,13 +53,13 @@ export const SettingsPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-foreground">Active Application Tier</span>
+              <span className="text-xs font-bold text-foreground">{t('settings.tierTitle')}</span>
               <Badge variant={isPro ? 'edition-pro' : 'edition-free'} size="sm">
                 {edition}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Switch between Community Free and Pro Studio edition features.
+              {t('settings.tierDesc')}
             </p>
           </div>
 
@@ -63,7 +67,7 @@ export const SettingsPage: React.FC = () => {
             variant={isPro ? 'outline' : 'gemini'}
             size="sm"
             onClick={toggleEdition}
-            className="text-xs font-semibold"
+            className="text-xs font-semibold cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Switch to {isPro ? 'Community' : 'Pro Studio'}</span>
@@ -71,15 +75,32 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Section 2: Download Directories */}
+      {/* Section 2: Interface Language */}
+      <div className="p-5 rounded-2xl border border-border/70 bg-card space-y-3 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <div className="text-xs font-bold text-foreground flex items-center gap-2">
+              <Globe className="w-4 h-4 text-purple-500" />
+              <span>{t('settings.language')}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Pilih bahasa tampilan antarmuka (Indonesian / English)
+            </p>
+          </div>
+
+          <LanguageSelector />
+        </div>
+      </div>
+
+      {/* Section 3: Download Directories */}
       <div className="p-5 rounded-2xl border border-border/70 bg-card space-y-4 shadow-sm">
         <div className="space-y-1">
           <label className="text-xs font-bold text-foreground flex items-center gap-2">
             <Folder className="w-4 h-4 text-primary" />
-            <span>Save Location</span>
+            <span>{t('settings.saveLocation')}</span>
           </label>
           <p className="text-xs text-muted-foreground">
-            Target folder where all videos and MP3 files will be stored.
+            {t('settings.saveLocationDesc')}
           </p>
         </div>
 
@@ -94,24 +115,24 @@ export const SettingsPage: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => updateSettings({ downloadDirectory: 'C:/Downloads/SmartAutoDownloader' })}
-            className="text-xs font-semibold shrink-0"
+            className="text-xs font-semibold shrink-0 cursor-pointer"
           >
-            Set Default
+            {t('settings.setDefault')}
           </Button>
         </div>
       </div>
 
-      {/* Section 3: Default Formats */}
+      {/* Section 4: Default Formats */}
       <div className="p-5 rounded-2xl border border-border/70 bg-card space-y-4 shadow-sm">
         <h3 className="text-xs font-bold text-foreground flex items-center gap-2">
           <Layers className="w-4 h-4 text-purple-500" />
-          <span>Default Quality & Formats</span>
+          <span>{t('settings.defaultFormats')}</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Default Video Quality
+              {t('settings.defaultVideoQuality')}
             </label>
             <select
               value={settings.defaultVideoQuality}
@@ -131,7 +152,7 @@ export const SettingsPage: React.FC = () => {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Default Audio Bitrate
+              {t('settings.defaultAudioBitrate')}
             </label>
             <select
               value={settings.defaultAudioFormat}
@@ -152,10 +173,10 @@ export const SettingsPage: React.FC = () => {
         <div className="pt-2 border-t border-border/40 flex items-center justify-between">
           <div>
             <div className="text-xs font-semibold text-foreground">
-              Automated FFmpeg Sidecar Muxing
+              {t('settings.autoMuxingTitle')}
             </div>
             <div className="text-[11px] text-muted-foreground">
-              Merges separate video & audio streams into a single MP4 automatically.
+              {t('settings.autoMuxingDesc')}
             </div>
           </div>
 
@@ -168,28 +189,28 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Section 4: System & Build Information */}
+      {/* Section 5: System & Build Information */}
       <div className="p-5 rounded-2xl border border-border/70 bg-card space-y-3 shadow-sm text-xs">
         <h3 className="font-bold text-foreground flex items-center gap-2">
           <Info className="w-4 h-4 text-blue-500" />
-          <span>System & Build Information</span>
+          <span>{t('settings.systemInfo')}</span>
         </h3>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">Semantic Version</div>
+            <div className="text-[11px] text-muted-foreground">{t('settings.version')}</div>
             <div className="font-mono font-bold text-foreground">{version}</div>
           </div>
 
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">Git Commit Hash</div>
+            <div className="text-[11px] text-muted-foreground">{t('settings.commit')}</div>
             <div className="font-mono font-bold text-purple-600 dark:text-purple-400">
               #{commitHash}
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">Backend Architecture</div>
+            <div className="text-[11px] text-muted-foreground">{t('settings.architecture')}</div>
             <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
               Tauri v2 + Tokio
             </div>

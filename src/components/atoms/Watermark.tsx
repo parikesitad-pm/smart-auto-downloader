@@ -1,6 +1,7 @@
 import React from 'react';
 import { Github, Heart } from 'lucide-react';
 import { openExternalUrl } from '../../services/tauri';
+import { useTranslation } from '../../store/languageStore';
 
 export interface WatermarkProps {
   className?: string;
@@ -11,6 +12,8 @@ export const Watermark: React.FC<WatermarkProps> = ({
   className = '',
   githubUsername = 'parikesitad-pm',
 }) => {
+  const { t } = useTranslation();
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     openExternalUrl(`https://github.com/${githubUsername}`);
@@ -25,7 +28,7 @@ export const Watermark: React.FC<WatermarkProps> = ({
     >
       <Github className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
       <span>
-        Created by{' '}
+        {t('footer.createdBy')}{' '}
         <span className="font-semibold text-foreground group-hover:text-primary transition-colors underline-offset-4 group-hover:underline">
           {githubUsername}
         </span>

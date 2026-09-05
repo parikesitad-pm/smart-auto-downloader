@@ -4,6 +4,7 @@ import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
 import { detectPlatform, getPlatformMeta } from '../../services/platformDetector';
 import { PlatformType } from '../../types/download';
+import { useTranslation } from '../../store/languageStore';
 
 export interface URLInputBarProps {
   url: string;
@@ -18,6 +19,7 @@ export const URLInputBar: React.FC<URLInputBarProps> = ({
   onSubmit,
   isLoading = false,
 }) => {
+  const { t } = useTranslation();
   const [detectedPlatform, setDetectedPlatform] = useState<PlatformType>('generic');
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export const URLInputBar: React.FC<URLInputBarProps> = ({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isLoading}
-          placeholder="Paste video or post link (YouTube, TikTok, Instagram, WhatsApp status)..."
+          placeholder={t('downloader.inputPlaceholder')}
           className="pl-11 pr-24 h-13 text-sm rounded-2xl bg-card border-border/80 shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-purple-500/40 focus-visible:border-purple-500"
         />
 
@@ -69,8 +71,8 @@ export const URLInputBar: React.FC<URLInputBarProps> = ({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
-              title="Clear input"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors cursor-pointer"
+              title={t('downloader.clearButton')}
             >
               <X className="w-4 h-4" />
             </button>
@@ -80,11 +82,11 @@ export const URLInputBar: React.FC<URLInputBarProps> = ({
               variant="secondary"
               size="sm"
               onClick={handlePaste}
-              className="h-8 text-xs font-medium rounded-xl gap-1.5"
-              title="Paste from clipboard"
+              className="h-8 text-xs font-medium rounded-xl gap-1.5 cursor-pointer"
+              title={t('downloader.pasteButton')}
             >
               <Clipboard className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Paste</span>
+              <span>{t('downloader.pasteButton')}</span>
             </Button>
           )}
         </div>
@@ -93,7 +95,7 @@ export const URLInputBar: React.FC<URLInputBarProps> = ({
       {url && (
         <div className="flex items-center justify-between px-1 text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Detected source:</span>
+            <span className="text-muted-foreground">{t('downloader.detectedSource')}</span>
             <span
               className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-semibold border ${platformMeta.badgeColor}`}
             >

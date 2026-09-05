@@ -1,177 +1,177 @@
 {
-  "latestVersion": "1.2.0",
-  "currentVersion": "1.2.0",
-  "releases": [
-    {
-      "version": "v1.2.0",
-      "releaseDate": "2026-09-05",
-      "commitHash": "b3e18a9",
-      "tagline": "Full Cross-Platform Matrix (Windows, macOS, Linux) & Native Icon Pipeline",
-      "isCurrent": true,
-      "whatsNew": [
-        "Comprehensive cross-platform build and installation guides for Windows (.msi/.exe), macOS (.dmg/.app), and Linux (.deb/.AppImage).",
-        "Automated multi-resolution desktop icon suite (ICO, ICNS, PNG 32x32 to 512x512, iOS/Android assets) generated from vector master.",
-        "Integrated cross-platform prerequisite resolver for WebKit2GTK (Linux), MSVC (Windows), and Xcode Command Line Tools (macOS)."
-      ],
-      "improvementsAndFixes": [
-        "Updated Tauri backend configuration for strict multi-target packaging.",
-        "Stabilized Cargo compilation pipeline with active Rust 1.98 toolchain on Windows.",
-        "Documented exact step-by-step roadmap for future minor (v1.3, v1.4...) and major (v2.0) version increments."
-      ],
-      "commitLog": [
-        {
-          "hash": "b3e18a9",
-          "message": "docs: add exhaustive multi-platform install/use guides for Windows, macOS, Linux and bump to v1.2",
-          "author": "parikesitad-pm",
-          "date": "2026-09-05"
-        },
-        {
-          "hash": "8c42a1f",
-          "message": "feat: generate native cross-platform icon assets and configure Tauri packager",
-          "author": "parikesitad-pm",
-          "date": "2026-09-05"
-        }
-      ]
-    },
-    {
-      "version": "v1.1.0",
-      "releaseDate": "2026-09-05",
-      "commitHash": "2d8f91c",
-      "tagline": "Build System Stabilization & Incremental Versioning Pipeline",
-      "isCurrent": false,
-      "whatsNew": [
-        "Dynamic incremental versioning policy: automatically tracks minor patches (v1.1, v1.2...) and major revisions (v2.0).",
-        "Automated Rust & Cargo toolchain diagnostic checker for smooth desktop compilation.",
-        "Synchronized Tauri v2 NPM packages and Rust crates to eliminate build warnings."
-      ],
-      "improvementsAndFixes": [
-        "Fixed TypeScript SVG symbol property typing in typography atoms.",
-        "Resolved unused variable lint warnings across Settings, HelpModal, and DownloadCard.",
-        "Added automatic Git commit hash capture fallback for initial repository states."
-      ],
-      "commitLog": [
-        {
-          "hash": "2d8f91c",
-          "message": "feat: bump version to v1.1 and stabilize build toolchain configurations",
-          "author": "parikesitad-pm",
-          "date": "2026-09-05"
-        },
-        {
-          "hash": "16a286d",
-          "message": "feat: initial commit for Smart Auto Downloader v1",
-          "author": "parikesitad-pm",
-          "date": "2026-09-05"
-        }
-      ]
-    },
-    {
-      "version": "v1.0.0",
-      "releaseDate": "2026-09-05",
-      "commitHash": "a1c3e4f",
-      "tagline": "Official Release v1 with Tauri v2 Async Engine & Multi-Platform Pipeline",
-      "isCurrent": false,
-      "whatsNew": [
-        "Modern Gemini-inspired Desktop UI with frosted glassmorphism & dual dynamic themes.",
-        "Full 4K Ultra HD (2160p) and 2K (1440p) direct downloading pipeline with zero quality loss.",
-        "Instant Audio-Only Studio Converter: MP3 (320kbps/192kbps), pristine M4A, and studio WAV.",
-        "TikTok No-Watermark high-speed scraper integration with instant CDN link resolver.",
-        "Instagram Reels, Carousels, and single video post downloader with automated session header spoofing.",
-        "WhatsApp Status Reader for local cache retrieval (Images, Videos, and Voice status).",
-        "Automated FFmpeg sidecar muxing for synchronizing high-bitrate separate video & audio streams."
-      ],
-      "improvementsAndFixes": [
-        "Migrated core architecture to Tauri v2 Rust for negligible RAM footprint (~35MB idle).",
-        "Real-time streaming stdout regex parser with instant ETA, percentage, and MB/s download speed metrics.",
-        "Resolved YouTube signature deciphering delay on age-restricted and music videos.",
-        "Graceful handling and user-friendly toasts for rate-limiting (HTTP 429), private media, and disk space limits.",
-        "Added Git short commit hash build injection for total transparency across dev/production builds."
-      ],
-      "commitLog": [
-        {
-          "hash": "a1c3e4f",
-          "message": "feat: release v1.0.0 with Tauri v2 async sidecar and dual-theme UI",
-          "author": "parikesitad-pm",
-          "date": "2026-09-05"
-        },
-        {
-          "hash": "7d9b231",
-          "message": "feat: implement WhatsApp status local cache viewer & exporter",
-          "author": "parikesitad-pm",
-          "date": "2026-09-04"
-        },
-        {
-          "hash": "4f2e10a",
-          "message": "perf: optimize regex stream parser for yt-dlp download progress events",
-          "author": "parikesitad-pm",
-          "date": "2026-09-03"
-        },
-        {
-          "hash": "b8a914c",
-          "message": "ui: add Gemini edition badge and Framer Motion modal animations",
-          "author": "parikesitad-pm",
-          "date": "2026-09-02"
-        }
-      ]
-    },
-    {
-      "version": "v0.9.5-beta",
-      "releaseDate": "2026-08-20",
-      "commitHash": "e83d91b",
-      "tagline": "Public Beta Testing & FFmpeg Auto-Muxing Engine",
-      "isCurrent": false,
-      "whatsNew": [
-        "Integrated FFmpeg sidecar pipeline for cross-platform container merging (MP4/MKV).",
-        "Interactive Queue Management with pause, resume, cancel, and clear completed controls.",
-        "Format selector dropdown supporting 1080p, 720p, 480p, and standard audio."
-      ],
-      "improvementsAndFixes": [
-        "Fixed Windows UNC path parsing issue when saving files with non-ASCII or emoji titles.",
-        "Reduced CPU throttling during multi-part file downloads.",
-        "Enhanced error recovery when internet connectivity drops temporarily during large 4K files."
-      ],
-      "commitLog": [
-        {
-          "hash": "e83d91b",
-          "message": "fix: resolve path escaping on Windows when title contains emojis",
-          "author": "parikesitad-pm",
-          "date": "2026-08-20"
-        },
-        {
-          "hash": "c3182ab",
-          "message": "feat: add FFmpeg sidecar auto-muxing for separate audio/video streams",
-          "author": "parikesitad-pm",
-          "date": "2026-08-18"
-        },
-        {
-          "hash": "19f0412",
-          "message": "refactor: convert state management to Zustand 5 with local persistence",
-          "author": "parikesitad-pm",
-          "date": "2026-08-15"
-        }
-      ]
-    },
-    {
-      "version": "v0.9.0-alpha",
-      "releaseDate": "2026-08-01",
-      "commitHash": "9b02ef3",
-      "tagline": "Initial Architectural Prototype & Proof of Concept",
-      "isCurrent": false,
-      "whatsNew": [
-        "Initial proof of concept for YouTube video downloads via yt-dlp.",
-        "Basic React + Tailwind CSS layout with dark mode support."
-      ],
-      "improvementsAndFixes": [
-        "Established Atomic Design folder hierarchy in React frontend.",
-        "Set up Tauri IPC command communication channel."
-      ],
-      "commitLog": [
-        {
-          "hash": "9b02ef3",
-          "message": "init: scaffold repository with Tauri v2 and React Vite setup",
-          "author": "parikesitad-pm",
-          "date": "2026-08-01"
-        }
-      ]
-    }
-  ]
+    "latestVersion":  "1.2.0",
+    "currentVersion":  "1.2.0",
+    "releases":  [
+                     {
+                         "version":  "v1.2.0",
+                         "releaseDate":  "2026-09-05",
+                         "commitHash":  "b3e18a9",
+                         "tagline":  "Full Cross-Platform Matrix (Windows, macOS, Linux) \u0026 Native Icon Pipeline",
+                         "isCurrent":  true,
+                         "whatsNew":  [
+                                          "Comprehensive cross-platform build and installation guides for Windows (.msi/.exe), macOS (.dmg/.app), and Linux (.deb/.AppImage).",
+                                          "Automated multi-resolution desktop icon suite (ICO, ICNS, PNG 32x32 to 512x512, iOS/Android assets) generated from vector master.",
+                                          "Integrated cross-platform prerequisite resolver for WebKit2GTK (Linux), MSVC (Windows), and Xcode Command Line Tools (macOS)."
+                                      ],
+                         "improvementsAndFixes":  [
+                                                      "Updated Tauri backend configuration for strict multi-target packaging.",
+                                                      "Stabilized Cargo compilation pipeline with active Rust 1.98 toolchain on Windows.",
+                                                      "Documented exact step-by-step roadmap for future minor (v1.3, v1.4...) and major (v2.0) version increments."
+                                                  ],
+                         "commitLog":  [
+                                           {
+                                               "hash":  "b3e18a9",
+                                               "message":  "docs: add exhaustive multi-platform install/use guides for Windows, macOS, Linux and bump to v1.2",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-05"
+                                           },
+                                           {
+                                               "hash":  "8c42a1f",
+                                               "message":  "feat: generate native cross-platform icon assets and configure Tauri packager",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-05"
+                                           }
+                                       ]
+                     },
+                     {
+                         "version":  "v1.1.0",
+                         "releaseDate":  "2026-09-05",
+                         "commitHash":  "2d8f91c",
+                         "tagline":  "Build System Stabilization \u0026 Incremental Versioning Pipeline",
+                         "isCurrent":  false,
+                         "whatsNew":  [
+                                          "Dynamic incremental versioning policy: automatically tracks minor patches (v1.1, v1.2...) and major revisions (v2.0).",
+                                          "Automated Rust \u0026 Cargo toolchain diagnostic checker for smooth desktop compilation.",
+                                          "Synchronized Tauri v2 NPM packages and Rust crates to eliminate build warnings."
+                                      ],
+                         "improvementsAndFixes":  [
+                                                      "Fixed TypeScript SVG symbol property typing in typography atoms.",
+                                                      "Resolved unused variable lint warnings across Settings, HelpModal, and DownloadCard.",
+                                                      "Added automatic Git commit hash capture fallback for initial repository states."
+                                                  ],
+                         "commitLog":  [
+                                           {
+                                               "hash":  "2d8f91c",
+                                               "message":  "feat: bump version to v1.1 and stabilize build toolchain configurations",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-05"
+                                           },
+                                           {
+                                               "hash":  "16a286d",
+                                               "message":  "feat: initial commit for Smart Auto Downloader v1",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-05"
+                                           }
+                                       ]
+                     },
+                     {
+                         "version":  "v1.0.0",
+                         "releaseDate":  "2026-09-05",
+                         "commitHash":  "a1c3e4f",
+                         "tagline":  "Official Release v1 with Tauri v2 Async Engine \u0026 Multi-Platform Pipeline",
+                         "isCurrent":  false,
+                         "whatsNew":  [
+                                          "Modern Gemini-inspired Desktop UI with frosted glassmorphism \u0026 dual dynamic themes.",
+                                          "Full 4K Ultra HD (2160p) and 2K (1440p) direct downloading pipeline with zero quality loss.",
+                                          "Instant Audio-Only Studio Converter: MP3 (320kbps/192kbps), pristine M4A, and studio WAV.",
+                                          "TikTok No-Watermark high-speed scraper integration with instant CDN link resolver.",
+                                          "Instagram Reels, Carousels, and single video post downloader with automated session header spoofing.",
+                                          "WhatsApp Status Reader for local cache retrieval (Images, Videos, and Voice status).",
+                                          "Automated FFmpeg sidecar muxing for synchronizing high-bitrate separate video \u0026 audio streams."
+                                      ],
+                         "improvementsAndFixes":  [
+                                                      "Migrated core architecture to Tauri v2 Rust for negligible RAM footprint (~35MB idle).",
+                                                      "Real-time streaming stdout regex parser with instant ETA, percentage, and MB/s download speed metrics.",
+                                                      "Resolved YouTube signature deciphering delay on age-restricted and music videos.",
+                                                      "Graceful handling and user-friendly toasts for rate-limiting (HTTP 429), private media, and disk space limits.",
+                                                      "Added Git short commit hash build injection for total transparency across dev/production builds."
+                                                  ],
+                         "commitLog":  [
+                                           {
+                                               "hash":  "a1c3e4f",
+                                               "message":  "feat: release v1.0.0 with Tauri v2 async sidecar and dual-theme UI",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-05"
+                                           },
+                                           {
+                                               "hash":  "7d9b231",
+                                               "message":  "feat: implement WhatsApp status local cache viewer \u0026 exporter",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-04"
+                                           },
+                                           {
+                                               "hash":  "4f2e10a",
+                                               "message":  "perf: optimize regex stream parser for yt-dlp download progress events",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-03"
+                                           },
+                                           {
+                                               "hash":  "b8a914c",
+                                               "message":  "ui: add Gemini edition badge and Framer Motion modal animations",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-09-02"
+                                           }
+                                       ]
+                     },
+                     {
+                         "version":  "v0.9.5-beta",
+                         "releaseDate":  "2026-08-20",
+                         "commitHash":  "e83d91b",
+                         "tagline":  "Public Beta Testing \u0026 FFmpeg Auto-Muxing Engine",
+                         "isCurrent":  false,
+                         "whatsNew":  [
+                                          "Integrated FFmpeg sidecar pipeline for cross-platform container merging (MP4/MKV).",
+                                          "Interactive Queue Management with pause, resume, cancel, and clear completed controls.",
+                                          "Format selector dropdown supporting 1080p, 720p, 480p, and standard audio."
+                                      ],
+                         "improvementsAndFixes":  [
+                                                      "Fixed Windows UNC path parsing issue when saving files with non-ASCII or emoji titles.",
+                                                      "Reduced CPU throttling during multi-part file downloads.",
+                                                      "Enhanced error recovery when internet connectivity drops temporarily during large 4K files."
+                                                  ],
+                         "commitLog":  [
+                                           {
+                                               "hash":  "e83d91b",
+                                               "message":  "fix: resolve path escaping on Windows when title contains emojis",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-08-20"
+                                           },
+                                           {
+                                               "hash":  "c3182ab",
+                                               "message":  "feat: add FFmpeg sidecar auto-muxing for separate audio/video streams",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-08-18"
+                                           },
+                                           {
+                                               "hash":  "19f0412",
+                                               "message":  "refactor: convert state management to Zustand 5 with local persistence",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-08-15"
+                                           }
+                                       ]
+                     },
+                     {
+                         "version":  "v0.9.0-alpha",
+                         "releaseDate":  "2026-08-01",
+                         "commitHash":  "9b02ef3",
+                         "tagline":  "Initial Architectural Prototype \u0026 Proof of Concept",
+                         "isCurrent":  false,
+                         "whatsNew":  [
+                                          "Initial proof of concept for YouTube video downloads via yt-dlp.",
+                                          "Basic React + Tailwind CSS layout with dark mode support."
+                                      ],
+                         "improvementsAndFixes":  [
+                                                      "Established Atomic Design folder hierarchy in React frontend.",
+                                                      "Set up Tauri IPC command communication channel."
+                                                  ],
+                         "commitLog":  [
+                                           {
+                                               "hash":  "9b02ef3",
+                                               "message":  "init: scaffold repository with Tauri v2 and React Vite setup",
+                                               "author":  "parikesitad-pm",
+                                               "date":  "2026-08-01"
+                                           }
+                                       ]
+                     }
+                 ]
 }

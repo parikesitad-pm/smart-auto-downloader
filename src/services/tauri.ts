@@ -6,7 +6,9 @@ export const isTauriEnvironment = (): boolean => {
 };
 
 // Open folder natively
-export const openDownloadFolderNative = async (folderPath?: string): Promise<boolean> => {
+export const openDownloadFolderNative = async (
+  folderPath?: string
+): Promise<boolean> => {
   if (isTauriEnvironment()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
@@ -17,7 +19,10 @@ export const openDownloadFolderNative = async (folderPath?: string): Promise<boo
       return false;
     }
   } else {
-    console.info('[Browser Dev Simulation] Open download folder called for:', folderPath);
+    console.info(
+      '[Browser Dev Simulation] Open download folder called for:',
+      folderPath
+    );
     return true;
   }
 };
@@ -39,17 +44,20 @@ export const openExternalUrl = async (url: string): Promise<void> => {
 
 // Listen to download progress from Tauri backend
 export const setupTauriProgressListener = async (
-  onProgress: (data: { id: string; progress: Partial<DownloadProgress> }) => void,
+  onProgress: (data: {
+    id: string;
+    progress: Partial<DownloadProgress>;
+  }) => void,
   onComplete: (data: { id: string; outputPath: string }) => void,
   onError: (data: { id: string; error: string }) => void
 ) => {
   if (isTauriEnvironment()) {
     try {
       const { listen } = await import('@tauri-apps/api/event');
-      const unlistenProgress = await listen<{ id: string; progress: Partial<DownloadProgress> }>(
-        'download-progress',
-        (event) => onProgress(event.payload)
-      );
+      const unlistenProgress = await listen<{
+        id: string;
+        progress: Partial<DownloadProgress>;
+      }>('download-progress', (event) => onProgress(event.payload));
 
       const unlistenComplete = await listen<{ id: string; outputPath: string }>(
         'download-complete',
@@ -116,7 +124,9 @@ export const triggerDownload = async (
           etaSeconds: 0,
           currentStep: 'Completed & Muxed',
         });
-        onComplete(`C:/Downloads/SmartAutoDownloader/${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`);
+        onComplete(
+          `C:/Downloads/SmartAutoDownloader/${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
+        );
       } else {
         const speed = (Math.random() * 3.5 + 4.2) * 1024 * 1024; // ~4.5 - 7.5 MB/s
         const remainingBytes = totalBytes * (1 - percent / 100);
@@ -141,4 +151,20 @@ export const triggerDownload = async (
       }
     }, 450);
   }
+};
+
+// Retrieve version dynamically from Tauri App API or Vite env fallback
+export const getAppVersion = async (): Promise<string> => {
+  if (isTauriEnvironment()) {
+    try {
+      const { getVersion } = await import('@tauri-apps/api/app');
+      const v = await getVersion();
+      if (v) return `v${v}`;
+    } catch (err) {
+      console.warn('Failed to retrieve version from Tauri API:', err);
+    }
+  }
+  return import.meta.env.VITE_APP_VERSION
+    ? `v${import.meta.env.VITE_APP_VERSION}`
+    : 'v1.2.0';
 };
