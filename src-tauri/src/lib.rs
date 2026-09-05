@@ -9,6 +9,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::download::start_download,
             commands::download::cancel_download,
+            commands::download::fetch_media_preview,
             commands::system::get_build_info,
             commands::system::open_download_folder,
             commands::whatsapp::read_whatsapp_status_cache,

@@ -1,13 +1,39 @@
 {
-    "latestVersion":  "1.2.0",
-    "currentVersion":  "1.2.0",
-    "releases":  [
-                     {
-                         "version":  "v1.2.0",
-                         "releaseDate":  "2026-09-05",
-                         "commitHash":  "b3e18a9",
-                         "tagline":  "Full Cross-Platform Matrix (Windows, macOS, Linux) \u0026 Native Icon Pipeline",
-                         "isCurrent":  true,
+    "latestVersion": "1.3.0",
+    "currentVersion": "1.3.0",
+    "releases": [
+        {
+            "version": "v1.3.0",
+            "releaseDate": "2026-09-05",
+            "commitHash": "a1f94c2",
+            "tagline": "Auto Thumbnail Preview, Contextual Quality Picker, Playlist Downloader & Silent FFmpeg",
+            "isCurrent": true,
+            "whatsNew": [
+                "Auto Media Preview: Pratinjau thumbnail, judul video, nama channel/uploader, dan durasi otomatis saat link ditempel (paste).",
+                "Contextual Quality Selector: Pilihan resolusi (4K Ultra HD, 2K, 1080p, audio MP3 320k) tampil rapi dan kontekstual setelah preview video muncul.",
+                "Interactive Playlist Picker: Modal pemilihan video playlist dengan fitur Select All / Deselect All dan tombol Download Batch.",
+                "Multi-Platform Release Targets: Dukungan kemasan otomatis ZIP untuk Windows, DMG untuk macOS, dan AppImage (langsung jalan tanpa install) untuk Linux."
+            ],
+            "improvementsAndFixes": [
+                "Silent Background Process: Mengeliminasi kemunculan jendela konsol hitam ffmpeg.exe dan yt-dlp.exe di Windows dengan flag CREATE_NO_WINDOW (0x08000000).",
+                "Universal Hash Fallback: Mengganti cmdlet Get-FileHash dengan algoritma SHA256 berbasis .NET runtime yang kompatibel 100% di semua versi PowerShell.",
+                "Optimal Watcher Config: Menambahkan pengecualian folder build di .vscode/settings.json untuk mencegah tabrakan file index Git di Windows NTFS."
+            ],
+            "commitLog": [
+                {
+                    "hash": "a1f94c2",
+                    "message": "feat: pratinjau thumbnail otomatis, selektor resolusi kontekstual, pemilih playlist, dan silent process ffmpeg",
+                    "author": "parikesitad-pm",
+                    "date": "2026-09-05"
+                }
+            ]
+        },
+        {
+            "version": "v1.2.0",
+            "releaseDate": "2026-09-05",
+            "commitHash": "b3e18a9",
+            "tagline": "Full Cross-Platform Matrix (Windows, macOS, Linux) & Native Icon Pipeline",
+            "isCurrent": false,
                          "whatsNew":  [
                                           "Comprehensive cross-platform build and installation guides for Windows (.msi/.exe), macOS (.dmg/.app), and Linux (.deb/.AppImage).",
                                           "Automated multi-resolution desktop icon suite (ICO, ICNS, PNG 32x32 to 512x512, iOS/Android assets) generated from vector master.",

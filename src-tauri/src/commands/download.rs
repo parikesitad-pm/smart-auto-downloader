@@ -5,6 +5,9 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 use regex::Regex;
 
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct DownloadPayload {
     pub id: String,
@@ -44,6 +47,104 @@ pub struct ErrorEvent {
     pub error: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlaylistItem {
+    pub id: String,
+    pub title: String,
+    pub url: String,
+    pub duration: Option<String>,
+    pub thumbnail: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MediaPreviewResponse {
+    pub is_playlist: bool,
+    pub title: String,
+    pub thumbnail: Option<String>,
+    pub uploader: Option<String>,
+    pub duration: Option<String>,
+    pub items: Vec<PlaylistItem>,
+}
+
+#[tauri::command]
+pub async fn fetch_media_preview(url: String) -> Result<MediaPreviewResponse, String> {
+    let clean_url = url.trim().to_string();
+    let mut cmd = Command::new("yt-dlp");
+    cmd.args(&[
+        "--dump-single-json",
+        "--flat-playlist",
+        "--skip-download",
+        "--no-warnings",
+        &clean_url,
+    ])
+    .stdout(Stdio::piped())
+    .stderr(Stdio::piped());
+
+    #[cfg(windows)]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    let output = cmd.output().await.map_err(|e| format!("Gagal memanggil yt-dlp: {}", e))?;
+
+    if !output.status.success() {
+        let err = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("yt-dlp error: {}", err));
+    }
+
+    let json_str = String::from_utf8_lossy(&output.stdout);
+    let val: serde_json::Value = serde_json::from_str(&json_str).map_err(|e| format!("Gagal membaca metadata JSON: {}", e))?;
+
+    let is_playlist = val.get("_type").and_then(|v| v.as_str()) == Some("playlist")
+        || val.get("entries").and_then(|v| v.as_array()).is_some();
+
+    let title = val.get("title").and_then(|v| v.as_str()).unwrap_or("Unknown Title").to_string();
+    let thumbnail = val.get("thumbnail").and_then(|v| v.as_str()).map(|s| s.to_string());
+    let uploader = val.get("uploader").or_else(|| val.get("channel")).and_then(|v| v.as_str()).map(|s| s.to_string());
+
+    let duration_str = if let Some(secs) = val.get("duration").and_then(|v| v.as_f64()) {
+        let total_sec = secs as u64;
+        let m = total_sec / 60;
+        let s = total_sec % 60;
+        Some(format!("{:02}:{:02}", m, s))
+    } else {
+        None
+    };
+
+    let mut items = Vec::new();
+    if let Some(entries) = val.get("entries").and_then(|v| v.as_array()) {
+        for entry in entries {
+            let item_id = entry.get("id").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            let item_title = entry.get("title").and_then(|v| v.as_str()).unwrap_or("Item Video").to_string();
+            let item_url = entry.get("url").and_then(|v| v.as_str())
+                .map(|u| if u.starts_with("http") { u.to_string() } else { format!("https://www.youtube.com/watch?v={}", item_id) })
+                .unwrap_or_else(|| format!("https://www.youtube.com/watch?v={}", item_id));
+            let item_thumb = entry.get("thumbnails").and_then(|t| t.as_array()).and_then(|arr| arr.last()).and_then(|thumb| thumb.get("url")).and_then(|u| u.as_str())
+                .or_else(|| entry.get("thumbnail").and_then(|t| t.as_str()))
+                .map(|s| s.to_string());
+            let item_dur = entry.get("duration").and_then(|v| v.as_f64()).map(|d| {
+                let sec = d as u64;
+                format!("{:02}:{:02}", sec / 60, sec % 60)
+            });
+
+            items.push(PlaylistItem {
+                id: item_id,
+                title: item_title,
+                url: item_url,
+                duration: item_dur,
+                thumbnail: item_thumb,
+            });
+        }
+    }
+
+    Ok(MediaPreviewResponse {
+        is_playlist,
+        title,
+        thumbnail,
+        uploader,
+        duration: duration_str,
+        items,
+    })
+}
+
 #[tauri::command]
 pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(), String> {
     let item_id = item.id.clone();
@@ -56,11 +157,15 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
         .output_dir
         .unwrap_or_else(|| dirs::download_dir().map(|d| d.to_string_lossy().to_string()).unwrap_or_else(|| ".".to_string()));
 
+    let _ = std::fs::create_dir_all(&download_dir);
+
     tokio::spawn(async move {
         // Build yt-dlp argument vector
         let mut args: Vec<String> = vec![
             "--newline".to_string(),
             "--progress".to_string(),
+            "--no-warnings".to_string(),
+            "--no-mtime".to_string(),
             "-o".to_string(),
             format!("{}/%(title)s.%(ext)s", download_dir),
         ];
@@ -102,12 +207,16 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
 
         args.push(url);
 
-        // Spawn child process with async piped stdout
-        let child_res = Command::new("yt-dlp")
-            .args(&args)
+        // Spawn child process with async piped stdout & CREATE_NO_WINDOW
+        let mut cmd = Command::new("yt-dlp");
+        cmd.args(&args)
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn();
+            .stderr(Stdio::piped());
+
+        #[cfg(windows)]
+        cmd.creation_flags(CREATE_NO_WINDOW);
+
+        let child_res = cmd.spawn();
 
         let mut child = match child_res {
             Ok(c) => c,

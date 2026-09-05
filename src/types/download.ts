@@ -53,3 +53,21 @@ export interface VideoInfo {
   availableQualities: VideoQuality[];
   url: string;
 }
+
+export interface PlaylistItemInfo {
+  id: string;
+  title: string;
+  url: string;
+  duration?: string;
+  thumbnail?: string;
+  selected: boolean;
+}
+
+export interface MediaPreviewData {
+  isPlaylist: boolean;
+  title: string;
+  thumbnail?: string;
+  uploader?: string;
+  duration?: string;
+  items?: PlaylistItemInfo[];
+}
