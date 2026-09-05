@@ -1,6 +1,6 @@
 [package]
 name = "smart-auto-downloader"
-version = "1.3.0"
+version = "2.0.0"
 description = "Smart Auto Downloader cross-platform desktop application"
 authors = ["parikesitad-pm"]
 edition = "2021"

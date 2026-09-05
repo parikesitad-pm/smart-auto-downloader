@@ -12,10 +12,12 @@ import {
   Clock,
   User,
   Loader2,
+  Activity,
 } from 'lucide-react';
 import { URLInputBar } from '../components/molecules/URLInputBar';
 import { FormatSelector } from '../components/molecules/FormatSelector';
 import { PlaylistModal } from '../components/organisms/PlaylistModal';
+import { NetworkTestModal } from '../components/organisms/NetworkTestModal';
 import { Button } from '../components/atoms/Button';
 import { useDownloadStore } from '../store/downloadStore';
 import { useSettingsStore } from '../store/settingsStore';
@@ -34,19 +36,26 @@ export interface DownloaderPageProps {
   onNavigateToQueue: () => void;
 }
 
-export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueue }) => {
+export const DownloaderPage: React.FC<DownloaderPageProps> = ({
+  onNavigateToQueue,
+}) => {
   const { t } = useTranslation();
   const { settings } = useSettingsStore();
   const { addToQueue, updateProgress, updateStatus } = useDownloadStore();
 
   const [url, setUrl] = useState('');
   const [formatType, setFormatType] = useState<DownloadFormatType>('video');
-  const [videoQuality, setVideoQuality] = useState<VideoQuality>(settings.defaultVideoQuality || 'best');
-  const [audioFormat, setAudioFormat] = useState<AudioFormat>(settings.defaultAudioFormat || 'mp3_320k');
+  const [videoQuality, setVideoQuality] = useState<VideoQuality>(
+    settings.defaultVideoQuality || 'best'
+  );
+  const [audioFormat, setAudioFormat] = useState<AudioFormat>(
+    settings.defaultAudioFormat || 'mp3_320k'
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFetchingPreview, setIsFetchingPreview] = useState(false);
   const [previewData, setPreviewData] = useState<MediaPreviewData | null>(null);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const [isNetworkTestOpen, setIsNetworkTestOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<{
     type: 'success' | 'error' | 'info';
     text: string;
@@ -106,7 +115,11 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
     }
 
     // If it's a playlist, open the playlist selection modal
-    if (previewData?.isPlaylist && previewData.items && previewData.items.length > 0) {
+    if (
+      previewData?.isPlaylist &&
+      previewData.items &&
+      previewData.items.length > 0
+    ) {
       setIsPlaylistModalOpen(true);
       return;
     }
@@ -116,7 +129,9 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
 
   const executeSingleDownload = (targetUrl: string, itemTitle?: string) => {
     const platform = detectPlatform(targetUrl);
-    const cleanTitle = itemTitle || (previewData?.title ? previewData.title : 'High Quality Media');
+    const cleanTitle =
+      itemTitle ||
+      (previewData?.title ? previewData.title : 'High Quality Media');
 
     setIsProcessing(true);
 
@@ -180,7 +195,10 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
   const handlePlaylistBatchDownload = (selectedItems: PlaylistItemInfo[]) => {
     if (selectedItems.length === 0) return;
 
-    showToast('success', `Menambahkan ${selectedItems.length} video playlist ke antrean unduhan...`);
+    showToast(
+      'success',
+      `Menambahkan ${selectedItems.length} video playlist ke antrean unduhan...`
+    );
     setUrl('');
     setPreviewData(null);
 
@@ -221,7 +239,8 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
             },
           },
           (progress) => updateProgress(itemId, progress),
-          (outputPath) => updateStatus(itemId, 'completed', undefined, outputPath),
+          (outputPath) =>
+            updateStatus(itemId, 'completed', undefined, outputPath),
           (errorMessage) => updateStatus(itemId, 'failed', errorMessage),
           settings.downloadDirectory
         );
@@ -245,19 +264,32 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Hero Banner with Gemini Glow */}
       <div className="relative rounded-3xl p-6 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-blue-500/10 border border-purple-500/20 overflow-hidden">
-        <div className="relative z-10 space-y-2">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-xs font-semibold text-purple-600 dark:text-purple-300">
-            <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
-            <span>{t('downloader.heroTag')}</span>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-xs font-semibold text-purple-600 dark:text-purple-300">
+              <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-pulse" />
+              <span>{t('downloader.heroTag')}</span>
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              {t('downloader.heroTitle')}
+            </h2>
+
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
+              {t('downloader.heroSubtitle')}
+            </p>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-            {t('downloader.heroTitle')}
-          </h2>
-
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
-            {t('downloader.heroSubtitle')}
-          </p>
+          <div className="flex sm:flex-col items-start gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsNetworkTestOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-card/80 hover:bg-card border border-border/80 hover:border-purple-500/50 text-xs font-bold text-foreground transition-all shadow-sm group cursor-pointer"
+            >
+              <Activity className="w-4 h-4 text-blue-500 group-hover:animate-pulse" />
+              <span>Diagnostik Jaringan</span>
+            </button>
+          </div>
         </div>
 
         <div className="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
@@ -270,8 +302,8 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
             toastMessage.type === 'error'
               ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400'
               : toastMessage.type === 'success'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-              : 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -301,24 +333,34 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
 
         {/* Quick sample chips */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-muted-foreground">
-          <span className="font-medium text-foreground/70">{t('downloader.quickTests')}</span>
+          <span className="font-medium text-foreground/70">
+            {t('downloader.quickTests')}
+          </span>
           <button
             type="button"
-            onClick={() => handleSampleClick('https://www.youtube.com/watch?v=dQw4w9WgXcQ')}
+            onClick={() =>
+              handleSampleClick('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+            }
             className="px-2 py-0.5 rounded-md bg-secondary hover:bg-secondary/80 border border-border/40 cursor-pointer text-foreground/80 hover:text-foreground"
           >
             YouTube 4K Sample
           </button>
           <button
             type="button"
-            onClick={() => handleSampleClick('https://www.tiktok.com/@sample/video/123456789')}
+            onClick={() =>
+              handleSampleClick(
+                'https://www.tiktok.com/@sample/video/123456789'
+              )
+            }
             className="px-2 py-0.5 rounded-md bg-secondary hover:bg-secondary/80 border border-border/40 cursor-pointer text-foreground/80 hover:text-foreground"
           >
             TikTok Sample
           </button>
           <button
             type="button"
-            onClick={() => handleSampleClick('https://www.instagram.com/reel/C3abcxyz/')}
+            onClick={() =>
+              handleSampleClick('https://www.instagram.com/reel/C3abcxyz/')
+            }
             className="px-2 py-0.5 rounded-md bg-secondary hover:bg-secondary/80 border border-border/40 cursor-pointer text-foreground/80 hover:text-foreground"
           >
             Instagram Reel
@@ -380,7 +422,9 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
                 {previewData.isPlaylist && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-pink-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/30">
                     <ListVideo className="w-3 h-3" />
-                    <span>Playlist ({previewData.items?.length || 0} videos)</span>
+                    <span>
+                      Playlist ({previewData.items?.length || 0} videos)
+                    </span>
                   </span>
                 )}
               </div>
@@ -397,20 +441,24 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
               )}
 
               {/* Playlist Action Trigger */}
-              {previewData.isPlaylist && previewData.items && previewData.items.length > 0 && (
-                <div className="pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsPlaylistModalOpen(true)}
-                    className="gap-1.5 text-xs font-semibold rounded-xl cursor-pointer"
-                  >
-                    <ListVideo className="w-3.5 h-3.5 text-purple-500" />
-                    <span>Pilih Item Video Playlist ({previewData.items.length})</span>
-                  </Button>
-                </div>
-              )}
+              {previewData.isPlaylist &&
+                previewData.items &&
+                previewData.items.length > 0 && (
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsPlaylistModalOpen(true)}
+                      className="gap-1.5 text-xs font-semibold rounded-xl cursor-pointer"
+                    >
+                      <ListVideo className="w-3.5 h-3.5 text-purple-500" />
+                      <span>
+                        Pilih Item Video Playlist ({previewData.items.length})
+                      </span>
+                    </Button>
+                  </div>
+                )}
             </div>
           </div>
         </div>
@@ -443,10 +491,10 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
                 {isProcessing
                   ? t('downloader.btnAnalyzing')
                   : previewData?.isPlaylist
-                  ? `Download Playlist (${previewData.items?.length || 0} Video)`
-                  : formatType === 'video'
-                  ? `Start Download (${videoQuality.toUpperCase()} MP4)`
-                  : `Start Download (${audioFormat.toUpperCase()})`}
+                    ? `Download Playlist (${previewData.items?.length || 0} Video)`
+                    : formatType === 'video'
+                      ? `Start Download (${videoQuality.toUpperCase()} MP4)`
+                      : `Start Download (${audioFormat.toUpperCase()})`}
               </span>
             </Button>
           </div>
@@ -496,6 +544,12 @@ export const DownloaderPage: React.FC<DownloaderPageProps> = ({ onNavigateToQueu
           onConfirmDownload={handlePlaylistBatchDownload}
         />
       )}
+
+      {/* Network Test & Speed Diagnostic Modal */}
+      <NetworkTestModal
+        isOpen={isNetworkTestOpen}
+        onClose={() => setIsNetworkTestOpen(false)}
+      />
     </div>
   );
 };

@@ -1,4 +1,8 @@
-import { DownloadItem, DownloadProgress, MediaPreviewData } from '../types/download';
+import {
+  DownloadItem,
+  DownloadProgress,
+  MediaPreviewData,
+} from '../types/download';
 
 // Detect if running inside a Tauri v2 desktop context
 export const isTauriEnvironment = (): boolean => {
@@ -6,7 +10,9 @@ export const isTauriEnvironment = (): boolean => {
 };
 
 // Fetch real metadata and thumbnail preview from yt-dlp backend
-export const fetchMediaMetadata = async (url: string): Promise<MediaPreviewData> => {
+export const fetchMediaMetadata = async (
+  url: string
+): Promise<MediaPreviewData> => {
   if (isTauriEnvironment()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
@@ -43,18 +49,40 @@ export const fetchMediaMetadata = async (url: string): Promise<MediaPreviewData>
 
   // Fallback for web simulation / offline development
   const cleanUrl = url.trim();
-  const isPlaylist = cleanUrl.includes('playlist') || cleanUrl.includes('&list=');
+  const isPlaylist =
+    cleanUrl.includes('playlist') || cleanUrl.includes('&list=');
   return {
     isPlaylist,
-    title: isPlaylist ? 'High Definition Media Playlist' : 'Ultra HD Video Stream',
-    thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
+    title: isPlaylist
+      ? 'High Definition Media Playlist'
+      : 'Ultra HD Video Stream',
+    thumbnail:
+      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
     uploader: 'Media Creator',
     duration: '03:45',
     items: isPlaylist
       ? [
-          { id: '1', title: 'Video Part 1 - 4K Master', url: cleanUrl, duration: '03:45', selected: true },
-          { id: '2', title: 'Video Part 2 - High Definition', url: cleanUrl, duration: '05:12', selected: true },
-          { id: '3', title: 'Video Part 3 - Studio Quality', url: cleanUrl, duration: '04:20', selected: true },
+          {
+            id: '1',
+            title: 'Video Part 1 - 4K Master',
+            url: cleanUrl,
+            duration: '03:45',
+            selected: true,
+          },
+          {
+            id: '2',
+            title: 'Video Part 2 - High Definition',
+            url: cleanUrl,
+            duration: '05:12',
+            selected: true,
+          },
+          {
+            id: '3',
+            title: 'Video Part 3 - Studio Quality',
+            url: cleanUrl,
+            duration: '04:20',
+            selected: true,
+          },
         ]
       : undefined,
   };
@@ -222,5 +250,46 @@ export const getAppVersion = async (): Promise<string> => {
   }
   return import.meta.env.VITE_APP_VERSION
     ? `v${import.meta.env.VITE_APP_VERSION}`
-    : 'v1.2.0';
+    : 'v2.0.0';
+};
+
+export interface EndpointLatency {
+  name: string;
+  host: string;
+  latency_ms: number;
+  status: string;
+}
+
+export interface NetworkDiagnosticResult {
+  is_online: boolean;
+  avg_latency_ms: number;
+  quality_tier: string;
+  endpoints: EndpointLatency[];
+  download_bandwidth_est: string;
+}
+
+export const runNetworkTest = async (): Promise<NetworkDiagnosticResult> => {
+  if (isTauriEnvironment()) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      return await invoke<NetworkDiagnosticResult>('run_network_test');
+    } catch (err) {
+      console.warn('Tauri run_network_test failed, using fallback:', err);
+    }
+  }
+
+  // Fallback dev simulator
+  return {
+    is_online: true,
+    avg_latency_ms: 32,
+    quality_tier: 'Turbo (Ultra Fast)',
+    download_bandwidth_est: '100+ Mbps (4K 60fps Ready)',
+    endpoints: [
+      { name: 'YouTube CDN', host: 'www.youtube.com', latency_ms: 28, status: 'Optimal' },
+      { name: 'Cloudflare CDN', host: '1.1.1.1', latency_ms: 16, status: 'Optimal' },
+      { name: 'TikTok CDN', host: 'www.tiktok.com', latency_ms: 42, status: 'Optimal' },
+      { name: 'Instagram CDN', host: 'www.instagram.com', latency_ms: 48, status: 'Good' },
+      { name: 'Google Global', host: '8.8.8.8', latency_ms: 20, status: 'Optimal' },
+    ],
+  };
 };

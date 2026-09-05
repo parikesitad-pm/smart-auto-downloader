@@ -12,6 +12,7 @@ pub fn run() {
             commands::download::fetch_media_preview,
             commands::system::get_build_info,
             commands::system::open_download_folder,
+            commands::system::run_network_test,
             commands::whatsapp::read_whatsapp_status_cache,
         ])
         .run(tauri::generate_context!())

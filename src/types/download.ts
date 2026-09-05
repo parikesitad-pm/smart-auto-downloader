@@ -1,12 +1,23 @@
-export type PlatformType = 'youtube' | 'instagram' | 'tiktok' | 'whatsapp' | 'generic';
+export type PlatformType =
+  | 'youtube'
+  | 'instagram'
+  | 'tiktok'
+  | 'whatsapp'
+  | 'generic';
 
-export type VideoQuality = 'best' | '2160p' | '1440p' | '1080p' | '720p' | '480p';
+export type VideoQuality =
+  | 'best'
+  | '2160p'
+  | '1440p'
+  | '1080p'
+  | '720p'
+  | '480p';
 
 export type AudioFormat = 'mp3_320k' | 'mp3_192k' | 'm4a' | 'wav';
 
 export type DownloadFormatType = 'video' | 'audio';
 
-export type DownloadStatus = 
+export type DownloadStatus =
   | 'idle'
   | 'queued'
   | 'downloading'

@@ -19,7 +19,7 @@ interface VersionState {
 
 const defaultVersion = import.meta.env.VITE_APP_VERSION
   ? `v${import.meta.env.VITE_APP_VERSION}`
-  : 'v1.2.0';
+  : 'v2.0.0';
 
 export const useVersionStore = create<VersionState>()(
   persist(

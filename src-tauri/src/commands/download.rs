@@ -160,12 +160,22 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
     let _ = std::fs::create_dir_all(&download_dir);
 
     tokio::spawn(async move {
-        // Build yt-dlp argument vector
+        // Build yt-dlp argument vector with Turbo Multi-Threaded Engine
         let mut args: Vec<String> = vec![
             "--newline".to_string(),
             "--progress".to_string(),
             "--no-warnings".to_string(),
             "--no-mtime".to_string(),
+            "--concurrent-fragments".to_string(),
+            "8".to_string(),
+            "--buffer-size".to_string(),
+            "64K".to_string(),
+            "--http-chunk-size".to_string(),
+            "10M".to_string(),
+            "--retries".to_string(),
+            "10".to_string(),
+            "--fragment-retries".to_string(),
+            "10".to_string(),
             "-o".to_string(),
             format!("{}/%(title)s.%(ext)s", download_dir),
         ];
