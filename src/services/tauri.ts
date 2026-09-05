@@ -9,10 +9,22 @@ export const isTauriEnvironment = (): boolean => {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 };
 
-// Fetch real metadata and thumbnail preview from yt-dlp backend
+// Robust YouTube Video ID extractor
+export const extractYouTubeVideoId = (url: string): string | null => {
+  const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match && match[1] ? match[1] : null;
+};
+
+// Fetch real metadata and thumbnail preview from yt-dlp backend or real CDN oEmbed
 export const fetchMediaMetadata = async (
   url: string
 ): Promise<MediaPreviewData> => {
+  const cleanUrl = url.trim();
+  const ytVideoId = extractYouTubeVideoId(cleanUrl);
+  const isPlaylist =
+    cleanUrl.includes('playlist') || cleanUrl.includes('&list=');
+
   if (isTauriEnvironment()) {
     try {
       const { invoke } = await import('@tauri-apps/api/core');
@@ -29,12 +41,18 @@ export const fetchMediaMetadata = async (
           duration?: string;
           thumbnail?: string;
         }>;
-      }>('fetch_media_preview', { url: url.trim() });
+      }>('fetch_media_preview', { url: cleanUrl });
+
+      // Ensure YouTube thumbnail fallback if yt-dlp returned null or webp
+      let thumbnail = res.thumbnail;
+      if (!thumbnail && ytVideoId) {
+        thumbnail = `https://i.ytimg.com/vi/${ytVideoId}/hqdefault.jpg`;
+      }
 
       return {
         isPlaylist: res.is_playlist,
         title: res.title,
-        thumbnail: res.thumbnail,
+        thumbnail,
         uploader: res.uploader,
         duration: res.duration,
         items: res.items?.map((it) => ({
@@ -43,48 +61,62 @@ export const fetchMediaMetadata = async (
         })),
       };
     } catch (err) {
-      console.warn('Tauri fetch_media_preview failed, falling back:', err);
+      console.warn('Tauri fetch_media_preview failed, trying oEmbed fallback:', err);
     }
   }
 
-  // Fallback for web simulation / offline development
-  const cleanUrl = url.trim();
-  const isPlaylist =
-    cleanUrl.includes('playlist') || cleanUrl.includes('&list=');
+  // Real YouTube oEmbed API for browser & fallback (No API key required, zero-config CORS)
+  if (ytVideoId) {
+    const realThumbnail = `https://i.ytimg.com/vi/${ytVideoId}/hqdefault.jpg`;
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytVideoId}&format=json`;
+      const response = await fetch(oembedUrl);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          isPlaylist,
+          title: data.title || `YouTube Video (${ytVideoId})`,
+          thumbnail: realThumbnail,
+          uploader: data.author_name || 'YouTube Creator',
+          duration: 'HD Video',
+          items: isPlaylist
+            ? [
+                {
+                  id: ytVideoId,
+                  title: data.title || `YouTube Video (${ytVideoId})`,
+                  url: cleanUrl,
+                  duration: '03:45',
+                  thumbnail: realThumbnail,
+                  selected: true,
+                },
+              ]
+            : undefined,
+        };
+      }
+    } catch (e) {
+      console.warn('YouTube oEmbed fetch failed, using direct CDN thumb:', e);
+    }
+
+    // Direct YouTube CDN Thumbnail without oEmbed
+    return {
+      isPlaylist,
+      title: `YouTube Media (${ytVideoId})`,
+      thumbnail: realThumbnail,
+      uploader: 'YouTube Creator',
+      duration: 'HD Video',
+    };
+  }
+
+  // Generic fallback for other platforms
   return {
     isPlaylist,
     title: isPlaylist
       ? 'High Definition Media Playlist'
-      : 'Ultra HD Video Stream',
+      : cleanUrl.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] + ' Media',
     thumbnail:
       'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
-    uploader: 'Media Creator',
+    uploader: 'Content Creator',
     duration: '03:45',
-    items: isPlaylist
-      ? [
-          {
-            id: '1',
-            title: 'Video Part 1 - 4K Master',
-            url: cleanUrl,
-            duration: '03:45',
-            selected: true,
-          },
-          {
-            id: '2',
-            title: 'Video Part 2 - High Definition',
-            url: cleanUrl,
-            duration: '05:12',
-            selected: true,
-          },
-          {
-            id: '3',
-            title: 'Video Part 3 - Studio Quality',
-            url: cleanUrl,
-            duration: '04:20',
-            selected: true,
-          },
-        ]
-      : undefined,
   };
 };
 
@@ -221,12 +253,13 @@ export const triggerDownload = async (
           currentStep: 'Completed & Muxed',
         });
 
-        // Trigger real browser download so the user actually receives a physical file on disk
+        // Preserve exact title while stripping only illegal Windows filesystem characters: \ / : * ? " < > |
         const ext = item.formatType === 'audio' ? 'mp3' : 'mp4';
-        const cleanName =
-          item.title.replace(/[^a-zA-Z0-9_\-\s]/g, '_').trim() ||
-          'media_download';
-        const fileName = `${cleanName}.${ext}`;
+        const safeTitle = (item.title || 'media_download')
+          .replace(/[\\/:*?"<>|]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        const fileName = `${safeTitle || 'video_download'}.${ext}`;
 
         try {
           const sampleBlob = new Blob(

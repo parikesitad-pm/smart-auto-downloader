@@ -163,7 +163,12 @@ pub async fn fetch_media_preview(url: String) -> Result<MediaPreviewResponse, St
         || val.get("entries").and_then(|v| v.as_array()).is_some();
 
     let title = val.get("title").and_then(|v| v.as_str()).unwrap_or("Unknown Title").to_string();
-    let thumbnail = val.get("thumbnail").and_then(|v| v.as_str()).map(|s| s.to_string());
+    let mut thumbnail = val.get("thumbnail").and_then(|v| v.as_str()).map(|s| s.to_string());
+    if thumbnail.is_none() {
+        if let Some(thumbs) = val.get("thumbnails").and_then(|t| t.as_array()) {
+            thumbnail = thumbs.last().and_then(|t| t.get("url")).and_then(|u| u.as_str()).map(|s| s.to_string());
+        }
+    }
     let uploader = val.get("uploader").or_else(|| val.get("channel")).and_then(|v| v.as_str()).map(|s| s.to_string());
 
     let duration_str = if let Some(secs) = val.get("duration").and_then(|v| v.as_f64()) {
@@ -244,6 +249,7 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
             "--progress".to_string(),
             "--no-warnings".to_string(),
             "--no-mtime".to_string(),
+            "--windows-filenames".to_string(),
             "--concurrent-fragments".to_string(),
             "8".to_string(),
             "--buffer-size".to_string(),
