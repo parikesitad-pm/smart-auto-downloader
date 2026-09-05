@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::process::Stdio;
 use tauri::{AppHandle, Emitter};
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -7,6 +8,70 @@ use regex::Regex;
 
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+pub fn find_binary(binary_name: &str) -> PathBuf {
+    let filename = if cfg!(windows) {
+        format!("{}.exe", binary_name)
+    } else {
+        binary_name.to_string()
+    };
+
+    // 1. Next to current running executable
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let candidate1 = exe_dir.join(&filename);
+            if candidate1.exists() {
+                return candidate1;
+            }
+            let candidate2 = exe_dir.join("bin").join(&filename);
+            if candidate2.exists() {
+                return candidate2;
+            }
+        }
+    }
+
+    // 2. In project src-tauri/bin
+    let local_bin = PathBuf::from("src-tauri").join("bin").join(&filename);
+    if local_bin.exists() {
+        return local_bin;
+    }
+    let local_bin_alt = PathBuf::from("bin").join(&filename);
+    if local_bin_alt.exists() {
+        return local_bin_alt;
+    }
+
+    // 3. In WinGet standard paths on Windows
+    #[cfg(windows)]
+    if let Ok(local_app_data) = std::env::var("LOCALAPPDATA") {
+        let winget_path = PathBuf::from(&local_app_data)
+            .join("Microsoft")
+            .join("WinGet")
+            .join("Packages");
+
+        if winget_path.exists() {
+            if binary_name == "yt-dlp" {
+                let candidate = winget_path
+                    .join("yt-dlp.yt-dlp_Microsoft.Winget.Source_8wekyb3d8bbwe")
+                    .join("yt-dlp.exe");
+                if candidate.exists() {
+                    return candidate;
+                }
+            } else if binary_name == "ffmpeg" {
+                let candidate = winget_path
+                    .join("yt-dlp.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe")
+                    .join("ffmpeg-N-124716-g054dffd133-win64-gpl")
+                    .join("bin")
+                    .join("ffmpeg.exe");
+                if candidate.exists() {
+                    return candidate;
+                }
+            }
+        }
+    }
+
+    // 4. Default to binary name in PATH
+    PathBuf::from(binary_name)
+}
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct DownloadPayload {
@@ -69,7 +134,8 @@ pub struct MediaPreviewResponse {
 #[tauri::command]
 pub async fn fetch_media_preview(url: String) -> Result<MediaPreviewResponse, String> {
     let clean_url = url.trim().to_string();
-    let mut cmd = Command::new("yt-dlp");
+    let yt_dlp_bin = find_binary("yt-dlp");
+    let mut cmd = Command::new(&yt_dlp_bin);
     cmd.args(&[
         "--dump-single-json",
         "--flat-playlist",
@@ -83,7 +149,7 @@ pub async fn fetch_media_preview(url: String) -> Result<MediaPreviewResponse, St
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
 
-    let output = cmd.output().await.map_err(|e| format!("Gagal memanggil yt-dlp: {}", e))?;
+    let output = cmd.output().await.map_err(|e| format!("Gagal memanggil yt-dlp ({:?}): {}", yt_dlp_bin, e))?;
 
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
@@ -155,11 +221,23 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
 
     let download_dir = item
         .output_dir
-        .unwrap_or_else(|| dirs::download_dir().map(|d| d.to_string_lossy().to_string()).unwrap_or_else(|| ".".to_string()));
+        .unwrap_or_else(|| {
+            dirs::download_dir()
+                .map(|d| d.join("SmartAutoDownloader").to_string_lossy().to_string())
+                .unwrap_or_else(|| "C:/Downloads/SmartAutoDownloader".to_string())
+        });
 
-    let _ = std::fs::create_dir_all(&download_dir);
+    if let Err(_e) = std::fs::create_dir_all(&download_dir) {
+        if let Some(user_down) = dirs::download_dir() {
+            let fallback_dir = user_down.join("SmartAutoDownloader");
+            let _ = std::fs::create_dir_all(&fallback_dir);
+        }
+    }
 
     tokio::spawn(async move {
+        let yt_dlp_bin = find_binary("yt-dlp");
+        let ffmpeg_bin = find_binary("ffmpeg");
+
         // Build yt-dlp argument vector with Turbo Multi-Threaded Engine
         let mut args: Vec<String> = vec![
             "--newline".to_string(),
@@ -179,6 +257,14 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
             "-o".to_string(),
             format!("{}/%(title)s.%(ext)s", download_dir),
         ];
+
+        // Explicitly supply ffmpeg location to yt-dlp if detected
+        if ffmpeg_bin.exists() {
+            if let Some(ffmpeg_dir) = ffmpeg_bin.parent() {
+                args.push("--ffmpeg-location".to_string());
+                args.push(ffmpeg_dir.to_string_lossy().to_string());
+            }
+        }
 
         if format_type == "audio" {
             args.push("-x".to_string());
@@ -218,7 +304,7 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
         args.push(url);
 
         // Spawn child process with async piped stdout & CREATE_NO_WINDOW
-        let mut cmd = Command::new("yt-dlp");
+        let mut cmd = Command::new(&yt_dlp_bin);
         cmd.args(&args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
@@ -235,7 +321,7 @@ pub async fn start_download(app: AppHandle, item: DownloadPayload) -> Result<(),
                     "download-error",
                     ErrorEvent {
                         id: item_id,
-                        error: format!("Failed to spawn yt-dlp binary: {}", e),
+                        error: format!("Gagal menjalankan yt-dlp ({:?}): {}", yt_dlp_bin, e),
                     },
                 );
                 return;

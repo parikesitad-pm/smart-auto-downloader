@@ -102,9 +102,21 @@ export const openDownloadFolderNative = async (
       return false;
     }
   } else {
-    console.info(
-      '[Browser Dev Simulation] Open download folder called for:',
-      folderPath
+    // In Browser Dev Mode, filesystem explorer cannot be invoked by sandboxed web JS.
+    // Copy path to clipboard and show interactive alert/toast
+    const target = folderPath || 'C:/Downloads/SmartAutoDownloader';
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(target);
+      }
+    } catch {
+      // ignore clipboard error
+    }
+    alert(
+      `[Mode Browser Web]\n` +
+      `File berhasil disimpan di folder Downloads bawaan browser Anda.\n\n` +
+      `Target konfigurasi path lokal:\n${target}\n\n` +
+      `(Path ini telah otomatis disalin ke Clipboard Anda)`
     );
     return true;
   }
@@ -208,9 +220,39 @@ export const triggerDownload = async (
           etaSeconds: 0,
           currentStep: 'Completed & Muxed',
         });
-        onComplete(
-          `C:/Downloads/SmartAutoDownloader/${item.title.replace(/[^a-zA-Z0-9]/g, '_')}.mp4`
-        );
+
+        // Trigger real browser download so the user actually receives a physical file on disk
+        const ext = item.formatType === 'audio' ? 'mp3' : 'mp4';
+        const cleanName = item.title.replace(/[^a-zA-Z0-9_\-\s]/g, '_').trim() || 'media_download';
+        const fileName = `${cleanName}.${ext}`;
+
+        try {
+          const sampleBlob = new Blob(
+            [
+              `[Smart Auto Downloader v2.0 - Development Simulation File]\n\n` +
+              `Judul Media: ${item.title}\n` +
+              `Platform: ${item.platform}\n` +
+              `Format: ${item.formatType.toUpperCase()} (${item.videoQuality || item.audioFormat})\n` +
+              `URL Asal: ${item.url}\n` +
+              `Waktu Unduh: ${new Date().toLocaleString()}\n` +
+              `Status: Berhasil diunduh melalui mode Browser Dev Simulator.\n`
+            ],
+            { type: item.formatType === 'audio' ? 'audio/mpeg' : 'video/mp4' }
+          );
+          const blobUrl = URL.createObjectURL(sampleBlob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+        } catch (e) {
+          console.warn('Failed to trigger browser download:', e);
+        }
+
+        const simulatedPath = `C:/Downloads/SmartAutoDownloader/${fileName}`;
+        onComplete(simulatedPath);
       } else {
         const speed = (Math.random() * 3.5 + 4.2) * 1024 * 1024; // ~4.5 - 7.5 MB/s
         const remainingBytes = totalBytes * (1 - percent / 100);

@@ -40,9 +40,24 @@ pub fn get_build_info() -> SystemBuildInfo {
 pub async fn open_download_folder(path: Option<String>) -> Result<(), String> {
     let target = path.unwrap_or_else(|| {
         dirs::download_dir()
-            .map(|d| d.to_string_lossy().to_string())
-            .unwrap_or_else(|| ".".to_string())
+            .map(|d| d.join("SmartAutoDownloader").to_string_lossy().to_string())
+            .unwrap_or_else(|| "C:/Downloads/SmartAutoDownloader".to_string())
     });
+
+    let target_path = std::path::Path::new(&target);
+    if !target_path.exists() {
+        let _ = std::fs::create_dir_all(target_path);
+    }
+
+    #[cfg(windows)]
+    {
+        if target_path.is_file() {
+            let _ = std::process::Command::new("explorer")
+                .arg(format!("/select,\"{}\"", target))
+                .spawn();
+            return Ok(());
+        }
+    }
 
     open::that(&target).map_err(|e| format!("Failed to open folder: {}", e))
 }

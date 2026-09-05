@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Smart Auto Downloader v2.0.0",
         "width": 1080,
         "height": 760,
