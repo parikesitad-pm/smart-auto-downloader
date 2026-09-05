@@ -15,6 +15,32 @@ import pkg from './package.json';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import os from 'os';
+import net from 'net';
+
+function measureTcpLatency(host: string, port = 443, timeoutMs = 2500): Promise<{ latency_ms: number; status: string }> {
+  return new Promise((resolve) => {
+    const start = Date.now();
+    const sock = net.createConnection(port, host);
+    sock.setTimeout(timeoutMs);
+
+    sock.on('connect', () => {
+      const elapsed = Date.now() - start;
+      sock.destroy();
+      const status = elapsed < 55 ? 'Optimal' : elapsed < 120 ? 'Good' : 'Moderate';
+      resolve({ latency_ms: elapsed, status });
+    });
+
+    sock.on('timeout', () => {
+      sock.destroy();
+      resolve({ latency_ms: 999, status: 'Timeout' });
+    });
+
+    sock.on('error', () => {
+      sock.destroy();
+      resolve({ latency_ms: 999, status: 'Unreachable' });
+    });
+  });
+}
 
 function devDownloaderPlugin() {
   return {
@@ -217,6 +243,207 @@ function devDownloaderPlugin() {
                 `data: ${JSON.stringify({ type: 'error', error: e.message })}\n\n`
               );
               res.end();
+            }
+          });
+          return;
+        }
+        res.statusCode = 405;
+        res.end();
+      });
+
+      // 3. Endpoint /api/network-test: Real TCP connection ping to CDN endpoints
+      server.middlewares.use('/api/network-test', async (req: any, res: any) => {
+        try {
+          const endpointsToTest = [
+            { name: 'YouTube CDN', host: 'www.youtube.com', port: 443 },
+            { name: 'Cloudflare CDN', host: '1.1.1.1', port: 443 },
+            { name: 'TikTok CDN', host: 'www.tiktok.com', port: 443 },
+            { name: 'Instagram CDN', host: 'www.instagram.com', port: 443 },
+            { name: 'Google Global', host: '8.8.8.8', port: 53 },
+          ];
+
+          const results = await Promise.all(
+            endpointsToTest.map(async (ep) => {
+              const ping = await measureTcpLatency(ep.host, ep.port);
+              return {
+                name: ep.name,
+                host: ep.host,
+                latency_ms: ping.latency_ms,
+                status: ping.status,
+              };
+            })
+          );
+
+          const validLatencies = results.filter((r) => r.latency_ms < 900);
+          const avg = validLatencies.length
+            ? Math.round(
+                validLatencies.reduce((acc, cur) => acc + cur.latency_ms, 0) /
+                  validLatencies.length
+              )
+            : 60;
+
+          const qualityTier =
+            avg < 55
+              ? 'Turbo (Ultra Fast)'
+              : avg < 110
+                ? 'Fast (HD Ready)'
+                : 'Moderate';
+
+          const bandwidthEst =
+            avg < 60
+              ? '100+ Mbps (4K 60fps Ready)'
+              : avg < 120
+                ? '50 - 100 Mbps (Full HD Ready)'
+                : '15 - 30 Mbps (Standard)';
+
+          res.setHeader('Content-Type', 'application/json');
+          res.end(
+            JSON.stringify({
+              is_online: true,
+              avg_latency_ms: avg,
+              quality_tier: qualityTier,
+              endpoints: results,
+              download_bandwidth_est: bandwidthEst,
+            })
+          );
+        } catch (e: any) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ error: e.message }));
+        }
+      });
+
+      // 4. Endpoint /api/preview: Real yt-dlp metadata & FULL PLAYLIST extraction (hundreds of videos)
+      server.middlewares.use('/api/preview', (req: any, res: any) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', (chunk: any) => (body += chunk));
+          req.on('end', () => {
+            try {
+              const { url } = JSON.parse(body || '{}');
+              const cleanUrl = (url || '').trim();
+              if (!cleanUrl) {
+                res.statusCode = 400;
+                res.end(JSON.stringify({ error: 'URL is required' }));
+                return;
+              }
+
+              const ytDlpPath = path.resolve(__dirname, 'src-tauri/bin/yt-dlp.exe');
+              const child = spawn(
+                ytDlpPath,
+                [
+                  '--dump-single-json',
+                  '--flat-playlist',
+                  '--skip-download',
+                  '--no-warnings',
+                  cleanUrl,
+                ],
+                { windowsHide: true }
+              );
+
+              let stdout = '';
+              let stderr = '';
+              child.stdout.on('data', (d: any) => (stdout += d.toString()));
+              child.stderr.on('data', (d: any) => (stderr += d.toString()));
+
+              child.on('close', (code: any) => {
+                if (code === 0 && stdout) {
+                  try {
+                    const val = JSON.parse(stdout);
+                    const isPlaylist =
+                      val._type === 'playlist' || Array.isArray(val.entries);
+                    const title = val.title || 'Unknown Title';
+                    let thumbnail = val.thumbnail;
+                    if (
+                      !thumbnail &&
+                      Array.isArray(val.thumbnails) &&
+                      val.thumbnails.length
+                    ) {
+                      thumbnail =
+                        val.thumbnails[val.thumbnails.length - 1].url;
+                    }
+                    const uploader =
+                      val.uploader || val.channel || 'Media Creator';
+                    const duration = val.duration
+                      ? `${Math.floor(val.duration / 60)}:${Math.floor(
+                          val.duration % 60
+                        )
+                          .toString()
+                          .padStart(2, '0')}`
+                      : undefined;
+
+                    const items: any[] = [];
+                    if (Array.isArray(val.entries)) {
+                      for (const entry of val.entries) {
+                        if (!entry) continue;
+                        const itemId = entry.id || '';
+                        const itemTitle = entry.title || 'Video Item';
+                        const itemUrl =
+                          entry.url && entry.url.startsWith('http')
+                            ? entry.url
+                            : `https://www.youtube.com/watch?v=${itemId}`;
+                        let itemThumb = entry.thumbnail;
+                        if (
+                          !itemThumb &&
+                          Array.isArray(entry.thumbnails) &&
+                          entry.thumbnails.length
+                        ) {
+                          itemThumb =
+                            entry.thumbnails[entry.thumbnails.length - 1].url;
+                        }
+                        if (!itemThumb && itemId) {
+                          itemThumb = `https://i.ytimg.com/vi/${itemId}/hqdefault.jpg`;
+                        }
+                        const itemDur = entry.duration
+                          ? `${Math.floor(entry.duration / 60)}:${Math.floor(
+                              entry.duration % 60
+                            )
+                              .toString()
+                              .padStart(2, '0')}`
+                          : undefined;
+
+                        items.push({
+                          id: itemId,
+                          title: itemTitle,
+                          url: itemUrl,
+                          duration: itemDur,
+                          thumbnail: itemThumb,
+                          selected: true,
+                        });
+                      }
+                    }
+
+                    res.setHeader('Content-Type', 'application/json');
+                    res.end(
+                      JSON.stringify({
+                        isPlaylist,
+                        title,
+                        thumbnail,
+                        uploader,
+                        duration,
+                        items,
+                      })
+                    );
+                    return;
+                  } catch (e: any) {
+                    res.statusCode = 500;
+                    res.end(
+                      JSON.stringify({
+                        error: `Gagal membaca JSON metadata: ${e.message}`,
+                      })
+                    );
+                    return;
+                  }
+                }
+                res.statusCode = 500;
+                res.end(
+                  JSON.stringify({
+                    error: stderr || `yt-dlp exited with code ${code}`,
+                  })
+                );
+              });
+            } catch (e: any) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: e.message }));
             }
           });
           return;

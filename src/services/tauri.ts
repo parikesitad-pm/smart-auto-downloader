@@ -69,6 +69,27 @@ export const fetchMediaMetadata = async (
     }
   }
 
+  // Call Vite Dev Server /api/preview (executes real yt-dlp to get FULL playlist with hundreds of videos!)
+  try {
+    const previewRes = await fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: cleanUrl }),
+    });
+    if (previewRes.ok) {
+      const data: MediaPreviewData = await previewRes.json();
+      return {
+        ...data,
+        items: data.items?.map((it) => ({ ...it, selected: true })),
+      };
+    }
+  } catch (e) {
+    console.warn(
+      'Dev API /api/preview failed, falling back to browser oEmbed:',
+      e
+    );
+  }
+
   // Real YouTube oEmbed API for browser & fallback (No API key required, zero-config CORS)
   if (ytVideoId) {
     const realThumbnail = `https://i.ytimg.com/vi/${ytVideoId}/hqdefault.jpg`;
@@ -359,6 +380,16 @@ export const runNetworkTest = async (): Promise<NetworkDiagnosticResult> => {
     } catch (err) {
       console.warn('Tauri run_network_test failed, using fallback:', err);
     }
+  }
+
+  // Real TCP ping via Vite dev API!
+  try {
+    const res = await fetch('/api/network-test');
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn('Dev API /api/network-test failed, using fallback:', e);
   }
 
   // Fallback dev simulator
