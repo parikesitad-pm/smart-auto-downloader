@@ -65,7 +65,8 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
                   Diagnostik Kecepatan & Jaringan Media
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  Pengujian latensi round-trip TCP ke CDN YouTube, TikTok, dan Instagram
+                  Pengujian latensi round-trip TCP ke CDN YouTube, TikTok, dan
+                  Instagram
                 </p>
               </div>
             </div>
@@ -111,14 +112,18 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
                     <span>Kualitas Streaming</span>
                   </div>
                   <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 line-clamp-1">
-                    {isLoading ? 'Menguji...' : result?.quality_tier ?? 'Optimal'}
+                    {isLoading
+                      ? 'Menguji...'
+                      : (result?.quality_tier ?? 'Optimal')}
                   </div>
                 </div>
               </div>
 
               {result?.download_bandwidth_est && !isLoading && (
                 <div className="mt-3 pt-2.5 border-t border-border/40 flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Estimasi Bandwidth Unduhan:</span>
+                  <span className="text-muted-foreground">
+                    Estimasi Bandwidth Unduhan:
+                  </span>
                   <span className="font-bold text-foreground font-mono">
                     {result.download_bandwidth_est}
                   </span>
@@ -133,7 +138,9 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
                   <Globe className="w-3.5 h-3.5 text-purple-500" />
                   <span>Latensi CDN Media Global</span>
                 </span>
-                <span className="text-[11px] text-muted-foreground">Target Port: 443 HTTPS</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Target Port: 443 HTTPS
+                </span>
               </div>
 
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -153,8 +160,12 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
                       <div className="flex items-center gap-2.5">
                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
                         <div>
-                          <div className="font-semibold text-foreground">{ep.name}</div>
-                          <div className="text-[10px] text-muted-foreground font-mono">{ep.host}</div>
+                          <div className="font-semibold text-foreground">
+                            {ep.name}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground font-mono">
+                            {ep.host}
+                          </div>
                         </div>
                       </div>
 
@@ -164,8 +175,8 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
                             ep.status === 'Optimal'
                               ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
                               : ep.status === 'Good'
-                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30'
-                              : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30'
                           }`}
                         >
                           {ep.status}
@@ -201,8 +212,12 @@ export const NetworkTestModal: React.FC<NetworkTestModalProps> = ({
               onClick={executeTest}
               className="gap-1.5 text-xs font-semibold cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>{isLoading ? 'Menguji Jaringan...' : 'Uji Ulang Latensi'}</span>
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`}
+              />
+              <span>
+                {isLoading ? 'Menguji Jaringan...' : 'Uji Ulang Latensi'}
+              </span>
             </Button>
           </div>
         </motion.div>

@@ -34,7 +34,9 @@ export const SettingsPage: React.FC = () => {
             <Settings className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-foreground">{t('settings.title')}</h2>
+            <h2 className="text-base font-bold text-foreground">
+              {t('settings.title')}
+            </h2>
             <p className="text-xs text-muted-foreground">
               {t('settings.subtitle')}
             </p>
@@ -56,7 +58,9 @@ export const SettingsPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-foreground">{t('settings.tierTitle')}</span>
+              <span className="text-xs font-bold text-foreground">
+                {t('settings.tierTitle')}
+              </span>
               <Badge variant={isPro ? 'edition-pro' : 'edition-free'} size="sm">
                 {edition}
               </Badge>
@@ -123,7 +127,9 @@ export const SettingsPage: React.FC = () => {
             size="sm"
             className="shrink-0 text-xs font-medium cursor-pointer"
             onClick={() => {
-              const newPath = prompt('Masukkan direktori penyimpanan unduhan baru:');
+              const newPath = prompt(
+                'Masukkan direktori penyimpanan unduhan baru:'
+              );
               if (newPath) updateSettings({ downloadDirectory: newPath });
             }}
           >
@@ -152,11 +158,15 @@ export const SettingsPage: React.FC = () => {
             <select
               value={settings.defaultVideoQuality}
               onChange={(e) =>
-                updateSettings({ defaultVideoQuality: e.target.value as VideoQuality })
+                updateSettings({
+                  defaultVideoQuality: e.target.value as VideoQuality,
+                })
               }
               className="w-full h-10 px-3 text-xs rounded-xl border border-border bg-background font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
             >
-              <option value="best">Kualitas Terbaik (Best / 4K / 2K / 1080p)</option>
+              <option value="best">
+                Kualitas Terbaik (Best / 4K / 2K / 1080p)
+              </option>
               <option value="1080p">Full HD (1080p)</option>
               <option value="720p">HD (720p)</option>
               <option value="480p">SD (480p)</option>
@@ -170,7 +180,9 @@ export const SettingsPage: React.FC = () => {
             <select
               value={settings.defaultAudioFormat}
               onChange={(e) =>
-                updateSettings({ defaultAudioFormat: e.target.value as AudioFormat })
+                updateSettings({
+                  defaultAudioFormat: e.target.value as AudioFormat,
+                })
               }
               className="w-full h-10 px-3 text-xs rounded-xl border border-border bg-background font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer"
             >
@@ -213,7 +225,8 @@ export const SettingsPage: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs text-muted-foreground">
-              Optimasi akselerasi multi-thread fragment 8x, buffer 64K, chunk 10M, dan pengukuran latensi CDN media.
+              Optimasi akselerasi multi-thread fragment 8x, buffer 64K, chunk
+              10M, dan pengukuran latensi CDN media.
             </p>
           </div>
 
@@ -238,19 +251,25 @@ export const SettingsPage: React.FC = () => {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">{t('settings.version')}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('settings.version')}
+            </div>
             <div className="font-mono font-bold text-foreground">{version}</div>
           </div>
 
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">{t('settings.commit')}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('settings.commit')}
+            </div>
             <div className="font-mono font-bold text-purple-600 dark:text-purple-400">
               #{commitHash}
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-muted/40 border border-border/40 space-y-0.5">
-            <div className="text-[11px] text-muted-foreground">{t('settings.architecture')}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {t('settings.architecture')}
+            </div>
             <div className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
               Tauri v2 + Tokio + Turbo Engine
             </div>

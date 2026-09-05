@@ -285,11 +285,36 @@ export const runNetworkTest = async (): Promise<NetworkDiagnosticResult> => {
     quality_tier: 'Turbo (Ultra Fast)',
     download_bandwidth_est: '100+ Mbps (4K 60fps Ready)',
     endpoints: [
-      { name: 'YouTube CDN', host: 'www.youtube.com', latency_ms: 28, status: 'Optimal' },
-      { name: 'Cloudflare CDN', host: '1.1.1.1', latency_ms: 16, status: 'Optimal' },
-      { name: 'TikTok CDN', host: 'www.tiktok.com', latency_ms: 42, status: 'Optimal' },
-      { name: 'Instagram CDN', host: 'www.instagram.com', latency_ms: 48, status: 'Good' },
-      { name: 'Google Global', host: '8.8.8.8', latency_ms: 20, status: 'Optimal' },
+      {
+        name: 'YouTube CDN',
+        host: 'www.youtube.com',
+        latency_ms: 28,
+        status: 'Optimal',
+      },
+      {
+        name: 'Cloudflare CDN',
+        host: '1.1.1.1',
+        latency_ms: 16,
+        status: 'Optimal',
+      },
+      {
+        name: 'TikTok CDN',
+        host: 'www.tiktok.com',
+        latency_ms: 42,
+        status: 'Optimal',
+      },
+      {
+        name: 'Instagram CDN',
+        host: 'www.instagram.com',
+        latency_ms: 48,
+        status: 'Good',
+      },
+      {
+        name: 'Google Global',
+        host: '8.8.8.8',
+        latency_ms: 20,
+        status: 'Optimal',
+      },
     ],
   };
 };
